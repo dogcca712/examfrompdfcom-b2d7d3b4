@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Sparkles } from "lucide-react";
 import { FileUpload } from "./FileUpload";
 import { ExamSettings } from "./ExamSettings";
@@ -7,6 +7,9 @@ import { ExamResult } from "./ExamResult";
 import { ErrorDisplay } from "./ErrorDisplay";
 import { Button } from "@/components/ui/button";
 import { ExamConfig, ExamJob, defaultExamConfig } from "@/types/exam";
+
+const API_ENDPOINT = "http://23.21.31.3/generate";
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 interface GeneratePanelProps {
   selectedJob: ExamJob | null;
@@ -26,6 +29,7 @@ export function GeneratePanel({
   const [error, setError] = useState<{ message: string; details?: string } | null>(
     null
   );
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const steps = [
     { id: "extract", label: "Extracting text" },
@@ -45,7 +49,38 @@ export function GeneratePanel({
     setFile(sampleFile);
   };
 
-  const simulateGeneration = useCallback(async () => {
+  const downloadPdf = (blob: Blob, fileName: string) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const generateExam = useCallback(async () => {
+    if (!file) return;
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      setError({
+        message: "File too large",
+        details: `Maximum file size is 20MB. Your file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`,
+      });
+      return;
+    }
+
+    // Validate file type
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      setError({
+        message: "Invalid file type",
+        details: "Please upload a PDF file.",
+      });
+      return;
+    }
+
     setIsGenerating(true);
     setError(null);
     setCurrentStep(0);
@@ -53,37 +88,101 @@ export function GeneratePanel({
     const newJob: ExamJob = {
       id: crypto.randomUUID(),
       jobId: crypto.randomUUID(),
-      fileName: file?.name || "sample-lecture.pdf",
+      fileName: file.name,
       status: "running",
       createdAt: new Date(),
     };
     onJobCreate(newJob);
 
-    // Simulate progress through steps
-    for (let i = 0; i < steps.length; i++) {
-      setCurrentStep(i);
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1000 + Math.random() * 1000)
-      );
-    }
+    // Create abort controller for timeout
+    abortControllerRef.current = new AbortController();
 
-    // Simulate success
-    const completedJob: ExamJob = {
-      ...newJob,
-      status: "done",
-      examTitle: "Practice Exam: Introduction to Computer Science",
-      courseCode: "CS101",
-      totalPages: 4,
-      downloadUrl: "#demo-download",
-    };
-    onJobUpdate(completedJob);
-    setIsGenerating(false);
-    setFile(null);
+    // Simulate progress through steps while waiting for API
+    const progressInterval = setInterval(() => {
+      setCurrentStep((prev) => {
+        if (prev < steps.length - 1) {
+          return prev + 1;
+        }
+        return prev;
+      });
+    }, 12000); // Move to next step every 12 seconds
+
+    try {
+      const formData = new FormData();
+      formData.append("lecture_pdf", file);
+
+      const response = await fetch(API_ENDPOINT, {
+        method: "POST",
+        body: formData,
+        signal: abortControllerRef.current.signal,
+      });
+
+      clearInterval(progressInterval);
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new Error(`Server error (${response.status}): ${errorText}`);
+      }
+
+      // Check if response is a PDF
+      const contentType = response.headers.get("content-type");
+      if (!contentType?.includes("application/pdf")) {
+        throw new Error("Server did not return a PDF file");
+      }
+
+      const pdfBlob = await response.blob();
+      
+      // Generate filename
+      const baseFileName = file.name.replace(/\.pdf$/i, "");
+      const examFileName = `${baseFileName}_exam.pdf`;
+
+      // Trigger download
+      downloadPdf(pdfBlob, examFileName);
+
+      // Create object URL for potential re-download
+      const downloadUrl = URL.createObjectURL(pdfBlob);
+
+      // Update job as completed
+      const completedJob: ExamJob = {
+        ...newJob,
+        status: "done",
+        examTitle: `Practice Exam: ${baseFileName}`,
+        courseCode: "Generated",
+        totalPages: Math.ceil(pdfBlob.size / 50000), // Rough estimate
+        downloadUrl,
+      };
+      onJobUpdate(completedJob);
+      setCurrentStep(steps.length - 1);
+      setFile(null);
+    } catch (err) {
+      clearInterval(progressInterval);
+      
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      const isAborted = err instanceof Error && err.name === "AbortError";
+      
+      if (!isAborted) {
+        setError({
+          message: "Failed to generate exam",
+          details: errorMessage,
+        });
+
+        // Update job as failed
+        const failedJob: ExamJob = {
+          ...newJob,
+          status: "failed",
+          error: errorMessage,
+        };
+        onJobUpdate(failedJob);
+      }
+    } finally {
+      setIsGenerating(false);
+      abortControllerRef.current = null;
+    }
   }, [file, onJobCreate, onJobUpdate, steps.length]);
 
   const handleGenerate = async () => {
     if (!file) return;
-    await simulateGeneration();
+    await generateExam();
   };
 
   const handleRetry = () => {
@@ -92,19 +191,33 @@ export function GeneratePanel({
   };
 
   const handleDownload = () => {
-    // In real implementation, this would download the actual PDF
-    console.log("Downloading exam:", selectedJob?.downloadUrl);
+    if (selectedJob?.downloadUrl) {
+      // For blob URLs, we need to fetch and re-download
+      if (selectedJob.downloadUrl.startsWith("blob:")) {
+        fetch(selectedJob.downloadUrl)
+          .then((res) => res.blob())
+          .then((blob) => {
+            const baseFileName = selectedJob.fileName.replace(/\.pdf$/i, "");
+            downloadPdf(blob, `${baseFileName}_exam.pdf`);
+          })
+          .catch(() => {
+            setError({
+              message: "Download expired",
+              details: "Please generate the exam again.",
+            });
+          });
+      } else {
+        window.open(selectedJob.downloadUrl, "_blank");
+      }
+    }
   };
 
   const handleRegenerate = () => {
     if (selectedJob) {
-      const mockFile = new File(
-        ["Regenerated content"],
-        selectedJob.fileName,
-        { type: "application/pdf" }
-      );
-      setFile(mockFile);
-      simulateGeneration();
+      // Note: For regeneration, user needs to re-upload the file
+      // since we don't store the original file
+      setError(null);
+      setFile(null);
     }
   };
 
