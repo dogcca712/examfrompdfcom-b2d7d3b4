@@ -93,7 +93,7 @@ export function GeneratePanel({
   }, [steps.length]);
 
   const triggerDownload = (jobId: string, fileName: string) => {
-    const downloadUrl = `${API_BASE}/download/${jobId}`;
+    const downloadUrl = `${API_BASE}/download/${jobId}?t=${Date.now()}`;
     const link = document.createElement("a");
     link.href = downloadUrl;
     link.download = fileName;
@@ -177,7 +177,7 @@ export function GeneratePanel({
         status: "done",
         examTitle: `Practice Exam: ${baseFileName}`,
         courseCode: "Generated",
-        downloadUrl: `${API_BASE}/download/${jobId}`,
+        downloadUrl: `${API_BASE}/download/${jobId}?t=${Date.now()}`,
       };
       onJobUpdate(completedJob);
       setFile(null);
