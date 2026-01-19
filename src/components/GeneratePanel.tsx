@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import { Sparkles } from "lucide-react";
 import { FileUpload } from "./FileUpload";
 import { ExamSettings } from "./ExamSettings";
@@ -8,8 +8,9 @@ import { ErrorDisplay } from "./ErrorDisplay";
 import { Button } from "@/components/ui/button";
 import { ExamConfig, ExamJob, defaultExamConfig } from "@/types/exam";
 
-const API_ENDPOINT = "http://23.21.31.3/generate";
+const API_BASE = "http://23.21.31.3";
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const POLL_INTERVAL = 2000; // 2 seconds
 
 interface GeneratePanelProps {
   selectedJob: ExamJob | null;
@@ -29,7 +30,7 @@ export function GeneratePanel({
   const [error, setError] = useState<{ message: string; details?: string } | null>(
     null
   );
-  const abortControllerRef = useRef<AbortController | null>(null);
+  
 
   const steps = [
     { id: "extract", label: "Extracting text" },
@@ -49,15 +50,56 @@ export function GeneratePanel({
     setFile(sampleFile);
   };
 
-  const downloadPdf = (blob: Blob, fileName: string) => {
-    const url = URL.createObjectURL(blob);
+
+  const pollJobStatus = useCallback(async (jobId: string, job: ExamJob): Promise<void> => {
+    const pollOnce = async (): Promise<{ status: string; error?: string }> => {
+      const response = await fetch(`${API_BASE}/status/${jobId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to check status (${response.status})`);
+      }
+      return response.json();
+    };
+
+    return new Promise((resolve, reject) => {
+      let stepIndex = 0;
+      
+      const poll = async () => {
+        try {
+          const result = await pollOnce();
+          
+          if (result.status === "queued" || result.status === "running") {
+            // Update progress step
+            if (stepIndex < steps.length - 1) {
+              stepIndex++;
+              setCurrentStep(stepIndex);
+            }
+            setTimeout(poll, POLL_INTERVAL);
+          } else if (result.status === "done") {
+            setCurrentStep(steps.length - 1);
+            resolve();
+          } else if (result.status === "failed") {
+            reject(new Error(result.error || "Job failed"));
+          } else {
+            // Unknown status, keep polling
+            setTimeout(poll, POLL_INTERVAL);
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      poll();
+    });
+  }, [steps.length]);
+
+  const triggerDownload = (jobId: string, fileName: string) => {
+    const downloadUrl = `${API_BASE}/download/${jobId}`;
     const link = document.createElement("a");
-    link.href = url;
+    link.href = downloadUrl;
     link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   const generateExam = useCallback(async () => {
@@ -87,98 +129,77 @@ export function GeneratePanel({
 
     const newJob: ExamJob = {
       id: crypto.randomUUID(),
-      jobId: crypto.randomUUID(),
+      jobId: "",
       fileName: file.name,
       status: "running",
       createdAt: new Date(),
     };
     onJobCreate(newJob);
 
-    // Create abort controller for timeout
-    abortControllerRef.current = new AbortController();
-
-    // Simulate progress through steps while waiting for API
-    const progressInterval = setInterval(() => {
-      setCurrentStep((prev) => {
-        if (prev < steps.length - 1) {
-          return prev + 1;
-        }
-        return prev;
-      });
-    }, 12000); // Move to next step every 12 seconds
-
     try {
+      // Step 1: Submit the job
       const formData = new FormData();
       formData.append("lecture_pdf", file);
 
-      const response = await fetch(API_ENDPOINT, {
+      const response = await fetch(`${API_BASE}/generate`, {
         method: "POST",
         body: formData,
-        signal: abortControllerRef.current.signal,
       });
-
-      clearInterval(progressInterval);
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => "Unknown error");
         throw new Error(`Server error (${response.status}): ${errorText}`);
       }
 
-      // Check if response is a PDF
-      const contentType = response.headers.get("content-type");
-      if (!contentType?.includes("application/pdf")) {
-        throw new Error("Server did not return a PDF file");
+      const data = await response.json();
+      const jobId = data.job_id;
+
+      if (!jobId) {
+        throw new Error("No job_id returned from server");
       }
 
-      const pdfBlob = await response.blob();
-      
-      // Generate filename
+      // Update job with real jobId
+      const updatedJob: ExamJob = { ...newJob, jobId };
+      onJobUpdate(updatedJob);
+
+      // Step 2: Poll for status
+      setCurrentStep(1);
+      await pollJobStatus(jobId, updatedJob);
+
+      // Step 3: Trigger download
       const baseFileName = file.name.replace(/\.pdf$/i, "");
       const examFileName = `${baseFileName}_exam.pdf`;
-
-      // Trigger download
-      downloadPdf(pdfBlob, examFileName);
-
-      // Create object URL for potential re-download
-      const downloadUrl = URL.createObjectURL(pdfBlob);
+      triggerDownload(jobId, examFileName);
 
       // Update job as completed
       const completedJob: ExamJob = {
-        ...newJob,
+        ...updatedJob,
         status: "done",
         examTitle: `Practice Exam: ${baseFileName}`,
         courseCode: "Generated",
-        totalPages: Math.ceil(pdfBlob.size / 50000), // Rough estimate
-        downloadUrl,
+        downloadUrl: `${API_BASE}/download/${jobId}`,
       };
       onJobUpdate(completedJob);
-      setCurrentStep(steps.length - 1);
       setFile(null);
     } catch (err) {
-      clearInterval(progressInterval);
-      
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-      const isAborted = err instanceof Error && err.name === "AbortError";
       
-      if (!isAborted) {
-        setError({
-          message: "Failed to generate exam",
-          details: errorMessage,
-        });
+      setError({
+        message: "Failed to generate exam",
+        details: errorMessage,
+      });
 
-        // Update job as failed
-        const failedJob: ExamJob = {
-          ...newJob,
-          status: "failed",
-          error: errorMessage,
-        };
-        onJobUpdate(failedJob);
-      }
+      // Update job as failed
+      const failedJob: ExamJob = {
+        ...newJob,
+        status: "failed",
+        error: errorMessage,
+      };
+      onJobUpdate(failedJob);
     } finally {
       setIsGenerating(false);
-      abortControllerRef.current = null;
     }
-  }, [file, onJobCreate, onJobUpdate, steps.length]);
+  }, [file, onJobCreate, onJobUpdate, pollJobStatus]);
 
   const handleGenerate = async () => {
     if (!file) return;
@@ -192,23 +213,13 @@ export function GeneratePanel({
 
   const handleDownload = () => {
     if (selectedJob?.downloadUrl) {
-      // For blob URLs, we need to fetch and re-download
-      if (selectedJob.downloadUrl.startsWith("blob:")) {
-        fetch(selectedJob.downloadUrl)
-          .then((res) => res.blob())
-          .then((blob) => {
-            const baseFileName = selectedJob.fileName.replace(/\.pdf$/i, "");
-            downloadPdf(blob, `${baseFileName}_exam.pdf`);
-          })
-          .catch(() => {
-            setError({
-              message: "Download expired",
-              details: "Please generate the exam again.",
-            });
-          });
-      } else {
-        window.open(selectedJob.downloadUrl, "_blank");
-      }
+      // Download URL is now a direct API endpoint
+      const link = document.createElement("a");
+      link.href = selectedJob.downloadUrl;
+      link.download = `${selectedJob.fileName.replace(/\.pdf$/i, "")}_exam.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
