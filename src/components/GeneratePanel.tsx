@@ -8,7 +8,7 @@ import { ErrorDisplay } from "./ErrorDisplay";
 import { Button } from "@/components/ui/button";
 import { ExamConfig, ExamJob, defaultExamConfig } from "@/types/exam";
 
-const API_BASE = "https://23.21.31.3";
+const API_BASE = "https://examfrompdf.com";
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const POLL_INTERVAL = 2000; // 2 seconds
 
