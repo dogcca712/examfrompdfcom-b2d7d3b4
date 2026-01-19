@@ -245,6 +245,11 @@ export function GeneratePanel({
     );
   }
 
+  const handleBackToHome = () => {
+    setError(null);
+    setFile(null);
+  };
+
   // Show error state
   if (error && !isGenerating) {
     return (
@@ -253,6 +258,7 @@ export function GeneratePanel({
           message={error.message}
           details={error.details}
           onRetry={handleRetry}
+          onBack={handleBackToHome}
         />
       </div>
     );
