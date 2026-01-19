@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertCircle, ChevronDown, RefreshCw } from "lucide-react";
+import { AlertCircle, ChevronDown, RefreshCw, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -7,9 +7,10 @@ interface ErrorDisplayProps {
   message: string;
   details?: string;
   onRetry: () => void;
+  onBack: () => void;
 }
 
-export function ErrorDisplay({ message, details, onRetry }: ErrorDisplayProps) {
+export function ErrorDisplay({ message, details, onRetry, onBack }: ErrorDisplayProps) {
   const [showDetails, setShowDetails] = useState(false);
 
   return (
@@ -46,7 +47,11 @@ export function ErrorDisplay({ message, details, onRetry }: ErrorDisplayProps) {
         </div>
       )}
 
-      <div className="mt-4">
+      <div className="mt-4 flex gap-3">
+        <Button onClick={onBack} variant="outline">
+          <Home className="mr-2 h-4 w-4" />
+          Back to Home
+        </Button>
         <Button onClick={onRetry} variant="outline">
           <RefreshCw className="mr-2 h-4 w-4" />
           Try again
