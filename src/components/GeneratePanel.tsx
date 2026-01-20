@@ -52,13 +52,32 @@ export function GeneratePanel({
 
 
   const pollJobStatus = useCallback(async (jobId: string, job: ExamJob): Promise<void> => {
+    let notFoundRetries = 0;
+    const MAX_NOT_FOUND_RETRIES = 5;
+    
     const pollOnce = async (): Promise<{ status: string; error?: string }> => {
       const response = await fetch(`${API_BASE}/status/${jobId}`);
+      
+      // Handle 404 - job might still be registering
+      if (response.status === 404) {
+        notFoundRetries++;
+        if (notFoundRetries <= MAX_NOT_FOUND_RETRIES) {
+          console.log(`Job not found yet, retry ${notFoundRetries}/${MAX_NOT_FOUND_RETRIES}`);
+          return { status: "pending" };
+        }
+        throw new Error("Job not found after multiple retries");
+      }
+      
       if (!response.ok) {
         throw new Error(`Failed to check status (${response.status})`);
       }
+      
+      notFoundRetries = 0; // Reset on success
       return response.json();
     };
+
+    // Initial delay to give backend time to register the job
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     return new Promise((resolve, reject) => {
       let stepIndex = 0;
@@ -67,7 +86,7 @@ export function GeneratePanel({
         try {
           const result = await pollOnce();
           
-          if (result.status === "queued" || result.status === "running") {
+          if (result.status === "pending" || result.status === "queued" || result.status === "running") {
             // Update progress step
             if (stepIndex < steps.length - 1) {
               stepIndex++;
