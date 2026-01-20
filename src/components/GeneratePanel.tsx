@@ -8,7 +8,7 @@ import { ErrorDisplay } from "./ErrorDisplay";
 import { Button } from "@/components/ui/button";
 import { ExamConfig, ExamJob, defaultExamConfig } from "@/types/exam";
 
-const API_BASE = "https://api.examfrompdf.com";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://api.examfrompdf.com";
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const POLL_INTERVAL = 2000; // 2 seconds
 
