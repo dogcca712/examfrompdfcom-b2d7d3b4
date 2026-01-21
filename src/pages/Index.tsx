@@ -3,14 +3,23 @@ import { Sidebar } from "@/components/Sidebar";
 import { GeneratePanel } from "@/components/GeneratePanel";
 import { ExamJob } from "@/types/exam";
 import { jobsApi, API_BASE } from "@/lib/api";
-
+import { useAuth } from "@/contexts/AuthContext";
 const Index = () => {
+  const { isAuthenticated } = useAuth();
   const [jobs, setJobs] = useState<ExamJob[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
 
-  // Fetch jobs on mount
+  // Fetch jobs on mount and when auth state changes
   useEffect(() => {
+    // Clear jobs when user logs out
+    if (!isAuthenticated) {
+      setJobs([]);
+      setSelectedJobId(null);
+      setIsLoadingJobs(false);
+      return;
+    }
+
     const fetchJobs = async () => {
       try {
         const response = await jobsApi.getJobs();
@@ -35,7 +44,7 @@ const Index = () => {
       }
     };
     fetchJobs();
-  }, []);
+  }, [isAuthenticated]);
 
   const selectedJob = jobs.find((job) => job.id === selectedJobId) || null;
 
