@@ -1,7 +1,12 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://api.examfrompdf.com";
 
 // Token management
-let accessToken: string | null = localStorage.getItem("access_token");
+let accessToken: string | null = null;
+
+// Initialize from localStorage
+if (typeof window !== "undefined") {
+  accessToken = localStorage.getItem("access_token");
+}
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
@@ -13,6 +18,15 @@ export function setAccessToken(token: string | null) {
 }
 
 export function getAccessToken(): string | null {
+  // Always read from localStorage to ensure we have the latest token
+  // This handles cases where token might be updated in another tab
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("access_token");
+    if (token !== accessToken) {
+      accessToken = token; // Sync the module variable
+    }
+    return token;
+  }
   return accessToken;
 }
 
@@ -26,8 +40,9 @@ export async function apiRequest<T>(
   };
 
   // Add auth header if token exists and not explicitly set
-  if (accessToken && !options.headers?.hasOwnProperty("Authorization")) {
-    (headers as Record<string, string>)["Authorization"] = `Bearer ${accessToken}`;
+  const token = getAccessToken(); // Get fresh token
+  if (token && !options.headers?.hasOwnProperty("Authorization")) {
+    (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
   }
 
   // Add Content-Type for JSON body

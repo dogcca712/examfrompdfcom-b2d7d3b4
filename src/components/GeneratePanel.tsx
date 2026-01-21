@@ -192,11 +192,21 @@ export function GeneratePanel({
       const formData = new FormData();
       formData.append("lecture_pdf", file);
 
-      const headers: HeadersInit = {};
+      // Get fresh token from localStorage
       const token = getAccessToken();
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+      if (!token) {
+        setError({
+          message: "Authentication required",
+          details: "Please log in to generate exams.",
+        });
+        setIsGenerating(false);
+        return;
       }
+
+      const headers: HeadersInit = {
+        "Authorization": `Bearer ${token}`,
+        // Don't set Content-Type - browser will set it automatically with boundary for FormData
+      };
 
       const response = await fetch(`${API_BASE}/generate`, {
         method: "POST",
