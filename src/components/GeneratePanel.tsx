@@ -5,10 +5,12 @@ import { ExamSettings } from "./ExamSettings";
 import { ProgressTimeline } from "./ProgressTimeline";
 import { ExamResult } from "./ExamResult";
 import { ErrorDisplay } from "./ErrorDisplay";
+import { UsageBanner } from "./UsageBanner";
 import { Button } from "@/components/ui/button";
 import { ExamConfig, ExamJob, defaultExamConfig } from "@/types/exam";
+import { useAuth } from "@/contexts/AuthContext";
+import { API_BASE, getAccessToken } from "@/lib/api";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://api.examfrompdf.com";
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const POLL_INTERVAL = 2000; // 2 seconds
 
@@ -23,6 +25,7 @@ export function GeneratePanel({
   onJobCreate,
   onJobUpdate,
 }: GeneratePanelProps) {
+  const { usage, refreshUsage } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [config, setConfig] = useState<ExamConfig>(defaultExamConfig);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -56,7 +59,13 @@ export function GeneratePanel({
     const MAX_NOT_FOUND_RETRIES = 5;
     
     const pollOnce = async (): Promise<{ status: string; error?: string }> => {
-      const response = await fetch(`${API_BASE}/status/${jobId}`);
+      const headers: HeadersInit = {};
+      const token = getAccessToken();
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`${API_BASE}/status/${jobId}`, { headers });
       
       // Handle 404 - job might still be registering
       if (response.status === 404) {
@@ -124,6 +133,15 @@ export function GeneratePanel({
   const generateExam = useCallback(async () => {
     if (!file) return;
 
+    // Check usage limits
+    if (usage && !usage.can_generate) {
+      setError({
+        message: "Usage limit reached",
+        details: "You've reached your plan's limit. Please upgrade to continue generating exams.",
+      });
+      return;
+    }
+
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
       setError({
@@ -156,12 +174,19 @@ export function GeneratePanel({
     onJobCreate(newJob);
 
     try {
-      // Step 1: Submit the job
+      // Step 1: Submit the job with auth
       const formData = new FormData();
       formData.append("lecture_pdf", file);
 
+      const headers: HeadersInit = {};
+      const token = getAccessToken();
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${API_BASE}/generate`, {
         method: "POST",
+        headers,
         body: formData,
       });
 
@@ -200,6 +225,8 @@ export function GeneratePanel({
       };
       onJobUpdate(completedJob);
       setFile(null);
+      // Refresh usage after successful generation
+      await refreshUsage();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       
@@ -218,7 +245,7 @@ export function GeneratePanel({
     } finally {
       setIsGenerating(false);
     }
-  }, [file, onJobCreate, onJobUpdate, pollJobStatus]);
+  }, [file, usage, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage]);
 
   const handleGenerate = async () => {
     if (!file) return;
@@ -313,6 +340,8 @@ export function GeneratePanel({
       </div>
 
       <div className="space-y-6">
+        <UsageBanner />
+        
         <FileUpload
           file={file}
           onFileSelect={setFile}
