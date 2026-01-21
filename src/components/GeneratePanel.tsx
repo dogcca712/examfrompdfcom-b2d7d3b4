@@ -208,15 +208,42 @@ export function GeneratePanel({
         // Don't set Content-Type - browser will set it automatically with boundary for FormData
       };
 
-      const response = await fetch(`${API_BASE}/generate`, {
-        method: "POST",
-        headers,
-        body: formData,
-      });
+      let response: Response;
+      try {
+        response = await fetch(`${API_BASE}/generate`, {
+          method: "POST",
+          headers,
+          body: formData,
+        });
+      } catch (fetchError) {
+        // Handle network errors (CORS, connection refused, etc.)
+        if (fetchError instanceof TypeError && fetchError.message.includes("fetch")) {
+          throw new Error(
+            `Network error: Unable to connect to ${API_BASE}. ` +
+            `Please check:\n` +
+            `1. Backend service is running\n` +
+            `2. CORS is configured correctly\n` +
+            `3. Network connection is stable`
+          );
+        }
+        throw fetchError;
+      }
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => "Unknown error");
-        throw new Error(`Server error (${response.status}): ${errorText}`);
+        
+        // Provide more specific error messages
+        if (response.status === 401) {
+          throw new Error("Authentication failed. Please log in again.");
+        } else if (response.status === 403) {
+          throw new Error("Permission denied. You may have reached your usage limit.");
+        } else if (response.status === 404) {
+          throw new Error(`Endpoint not found: ${API_BASE}/generate`);
+        } else if (response.status >= 500) {
+          throw new Error(`Server error (${response.status}): ${errorText || "Internal server error"}`);
+        } else {
+          throw new Error(`Request failed (${response.status}): ${errorText || "Unknown error"}`);
+        }
       }
 
       const data = await response.json();
@@ -252,11 +279,29 @@ export function GeneratePanel({
       // Refresh usage after successful generation
       await refreshUsage();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      let errorMessage = "Unknown error occurred";
+      let errorDetails = "";
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        // If error message contains newlines, split into message and details
+        if (err.message.includes("\n")) {
+          const parts = err.message.split("\n");
+          errorMessage = parts[0];
+          errorDetails = parts.slice(1).join("\n");
+        } else {
+          errorDetails = err.message;
+        }
+      } else if (typeof err === "string") {
+        errorMessage = err;
+        errorDetails = err;
+      }
+      
+      console.error("Generate exam error:", err);
       
       setError({
         message: "Failed to generate exam",
-        details: errorMessage,
+        details: errorDetails || errorMessage,
       });
 
       // Update job as failed
