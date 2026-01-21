@@ -226,7 +226,8 @@ export function GeneratePanel({
         const errorText = await response.text().catch(() => "Unknown error");
         
         // Provide more specific error messages
-        if (response.status === 401) {
+        // Note: 401 is OK for anonymous users, they can still upload
+        if (response.status === 401 && isAuthenticated) {
           throw new Error("Authentication failed. Please log in again.");
         } else if (response.status === 403) {
           throw new Error("Permission denied. You may have reached your usage limit.");
