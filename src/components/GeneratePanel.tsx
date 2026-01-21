@@ -120,14 +120,28 @@ export function GeneratePanel({
     });
   }, [steps.length]);
 
-  const triggerDownload = (jobId: string, fileName: string) => {
+  const triggerDownload = async (jobId: string, fileName: string) => {
     const downloadUrl = `${API_BASE}/download/${jobId}?t=${Date.now()}`;
+    const headers: HeadersInit = {};
+    const token = getAccessToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(downloadUrl, { headers });
+    if (!response.ok) {
+      throw new Error(`Download failed (${response.status})`);
+    }
+    
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = downloadUrl;
+    link.href = blobUrl;
     link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
   };
 
   const generateExam = useCallback(async () => {
