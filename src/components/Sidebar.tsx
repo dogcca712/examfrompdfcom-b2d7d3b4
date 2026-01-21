@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ExamJob } from "@/types/exam";
 import { cn } from "@/lib/utils";
 
@@ -94,7 +95,10 @@ export function Sidebar({
                 ExamGen
               </span>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+              <UserMenu />
+            </div>
           </div>
 
           {/* New Exam Button */}
