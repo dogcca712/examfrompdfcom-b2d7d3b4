@@ -36,16 +36,14 @@ function parseFilenameFromContentDisposition(header: string | null): string | nu
 
 export async function downloadPdfWithAuth(url: string, fallbackFileName: string) {
   const token = getAccessToken();
-  if (!token) {
-    throw new Error("未登录或会话已过期，请重新登录后再下载。");
+  const resolvedUrl = appendCacheBuster(resolveApiUrl(url));
+  
+  const headers: HeadersInit = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const resolvedUrl = appendCacheBuster(resolveApiUrl(url));
-  const response = await fetch(resolvedUrl, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await fetch(resolvedUrl, { headers });
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
