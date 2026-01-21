@@ -6,18 +6,18 @@ import { useAuth } from "@/contexts/AuthContext";
 const proFeatures = [
   {
     icon: SlidersHorizontal,
-    title: "调整题目难度",
-    description: "从简单到困难，完全掌控试卷难度",
+    title: "Adjust Difficulty",
+    description: "Control exam difficulty from easy to hard",
   },
   {
     icon: Sparkles,
-    title: "调整题目数量",
-    description: "自定义选择题、简答题、论述题数量",
+    title: "Customize Question Count",
+    description: "Set the number of MCQs, short answers, and essays",
   },
   {
     icon: FileStack,
-    title: "多文件综合出题",
-    description: "上传整学期的讲义，生成综合期末试卷",
+    title: "Multi-file Exams",
+    description: "Upload an entire semester's notes for comprehensive finals",
   },
 ];
 
@@ -32,8 +32,8 @@ export function ProUpsellCard() {
           <Crown className="h-6 w-6 text-primary-foreground" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-foreground">升级到 Pro</h3>
-          <p className="text-sm text-muted-foreground">解锁全部高级功能</p>
+          <h3 className="text-xl font-bold text-foreground">Upgrade to Pro</h3>
+          <p className="text-sm text-muted-foreground">Unlock all advanced features</p>
         </div>
       </div>
 
@@ -60,7 +60,7 @@ export function ProUpsellCard() {
           <Button asChild size="lg" variant="gradient" className="flex-1">
             <Link to="/pricing">
               <Zap className="mr-2 h-4 w-4" />
-              查看 Pro 方案
+              View Pro Plans
             </Link>
           </Button>
         ) : (
@@ -68,11 +68,11 @@ export function ProUpsellCard() {
             <Button asChild size="lg" variant="gradient" className="flex-1">
               <Link to="/register">
                 <Zap className="mr-2 h-4 w-4" />
-                免费注册并升级
+                Sign Up &amp; Upgrade
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="flex-1">
-              <Link to="/login">已有账号？登录</Link>
+              <Link to="/login">Already have an account? Log in</Link>
             </Button>
           </>
         )}
@@ -80,7 +80,7 @@ export function ProUpsellCard() {
 
       {/* Trust badge */}
       <p className="mt-4 text-center text-xs text-muted-foreground">
-        🎓 已有超过 10,000 名学生使用 ExamGen 备考
+        🎓 Over 10,000 students use ExamGen to prepare for exams
       </p>
     </div>
   );

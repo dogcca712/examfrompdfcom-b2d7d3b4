@@ -437,7 +437,7 @@ export function GeneratePanel({
             {/* Show hint for guests */}
             {!isAuthenticated && (
               <p className="text-center text-sm text-muted-foreground">
-                🔓 登录后可自定义题目数量和难度
+                🔓 Log in to customize question count and difficulty
               </p>
             )}
           </>
