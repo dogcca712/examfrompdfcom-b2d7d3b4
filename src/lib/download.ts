@@ -47,7 +47,7 @@ export async function downloadPdfWithAuth(url: string, fallbackFileName: string)
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(text || `下载失败（${response.status}）`);
+    throw new Error(text || `Download failed (${response.status})`);
   }
 
   const blob = await response.blob();

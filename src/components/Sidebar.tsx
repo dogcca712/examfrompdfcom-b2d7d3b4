@@ -181,7 +181,7 @@ export function Sidebar({
                                 const message =
                                   err instanceof Error
                                     ? err.message
-                                    : "下载失败，请稍后再试";
+                                    : "Download failed, please try again";
                                 console.error("History download failed:", err);
                                 toast.error(message);
                               }
