@@ -6,6 +6,7 @@ import { ProgressTimeline } from "./ProgressTimeline";
 import { ExamResult } from "./ExamResult";
 import { ErrorDisplay } from "./ErrorDisplay";
 import { UsageBanner } from "./UsageBanner";
+import { ProUpsellCard } from "./ProUpsellCard";
 import { Button } from "@/components/ui/button";
 import { ExamConfig, ExamJob, defaultExamConfig } from "@/types/exam";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,7 +26,7 @@ export function GeneratePanel({
   onJobCreate,
   onJobUpdate,
 }: GeneratePanelProps) {
-  const { usage, refreshUsage } = useAuth();
+  const { usage, refreshUsage, isAuthenticated } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [config, setConfig] = useState<ExamConfig>(defaultExamConfig);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -147,8 +148,8 @@ export function GeneratePanel({
   const generateExam = useCallback(async () => {
     if (!file) return;
 
-    // Check usage limits
-    if (usage && !usage.can_generate) {
+    // Check usage limits (only for authenticated users with usage data)
+    if (isAuthenticated && usage && !usage.can_generate) {
       setError({
         message: "Usage limit reached",
         details: "You've reached your plan's limit. Please upgrade to continue generating exams.",
@@ -192,21 +193,13 @@ export function GeneratePanel({
       const formData = new FormData();
       formData.append("lecture_pdf", file);
 
-      // Get fresh token from localStorage
+      // Get token if available (optional for guest users)
       const token = getAccessToken();
-      if (!token) {
-        setError({
-          message: "Authentication required",
-          details: "Please log in to generate exams.",
-        });
-        setIsGenerating(false);
-        return;
+      
+      const headers: HeadersInit = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
       }
-
-      const headers: HeadersInit = {
-        "Authorization": `Bearer ${token}`,
-        // Don't set Content-Type - browser will set it automatically with boundary for FormData
-      };
 
       let response: Response;
       try {
@@ -420,11 +413,14 @@ export function GeneratePanel({
 
         {file && (
           <>
-            <ExamSettings
-              config={config}
-              onChange={setConfig}
-              disabled={isGenerating}
-            />
+            {/* Only show settings for authenticated users (Pro feature) */}
+            {isAuthenticated && (
+              <ExamSettings
+                config={config}
+                onChange={setConfig}
+                disabled={isGenerating}
+              />
+            )}
 
             <Button
               onClick={handleGenerate}
@@ -436,6 +432,13 @@ export function GeneratePanel({
               <Sparkles className="mr-2 h-5 w-5" />
               Generate Exam
             </Button>
+
+            {/* Show hint for guests */}
+            {!isAuthenticated && (
+              <p className="text-center text-sm text-muted-foreground">
+                🔓 登录后可自定义题目数量和难度
+              </p>
+            )}
           </>
         )}
       </div>
