@@ -118,5 +118,23 @@ export const paymentsApi = {
     }>("/payments/subscription"),
 };
 
+// Jobs API
+export interface JobResponse {
+  id: string;
+  jobId: string;
+  fileName: string;
+  status: "queued" | "running" | "done" | "failed";
+  createdAt: string;
+  downloadUrl?: string;
+  error?: string;
+}
+
+export const jobsApi = {
+  getJobs: (limit = 50, offset = 0) =>
+    apiRequest<{ jobs: JobResponse[]; total: number }>(
+      `/jobs?limit=${limit}&offset=${offset}`
+    ),
+};
+
 // Export API_BASE for use in other modules
 export { API_BASE };
