@@ -8,11 +8,13 @@ import {
   Download,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/UserMenu";
 import { ExamJob } from "@/types/exam";
 import { cn } from "@/lib/utils";
+import { downloadPdfWithAuth } from "@/lib/download";
 
 interface SidebarProps {
   jobs: ExamJob[];
@@ -30,6 +32,11 @@ export function Sidebar({
   onDeleteJob,
 }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const getExamFileName = (originalPdfName: string) => {
+    const base = originalPdfName.replace(/\.pdf$/i, "");
+    return `${base}_exam.pdf`;
+  };
 
   const formatDate = (date: Date) => {
     const now = new Date();
@@ -164,7 +171,21 @@ export function Sidebar({
                           className="h-7 w-7"
                           onClick={(e) => {
                             e.stopPropagation();
-                            window.open(job.downloadUrl, "_blank");
+                            void (async () => {
+                              try {
+                                await downloadPdfWithAuth(
+                                  job.downloadUrl!,
+                                  getExamFileName(job.fileName)
+                                );
+                              } catch (err) {
+                                const message =
+                                  err instanceof Error
+                                    ? err.message
+                                    : "下载失败，请稍后再试";
+                                console.error("History download failed:", err);
+                                toast.error(message);
+                              }
+                            })();
                           }}
                         >
                           <Download className="h-3.5 w-3.5" />
