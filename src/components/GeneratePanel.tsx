@@ -192,6 +192,12 @@ export function GeneratePanel({
       // Step 1: Submit the job with auth
       const formData = new FormData();
       formData.append("lecture_pdf", file);
+      
+      // Append exam settings to the request
+      formData.append("mcq_count", config.mcqCount.toString());
+      formData.append("short_answer_count", config.shortAnswerCount.toString());
+      formData.append("long_question_count", config.longQuestionCount.toString());
+      formData.append("difficulty", config.difficulty);
 
       // Get token if available (optional for guest users)
       const token = getAccessToken();
