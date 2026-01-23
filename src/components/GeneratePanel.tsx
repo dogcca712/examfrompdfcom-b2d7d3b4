@@ -193,10 +193,10 @@ export function GeneratePanel({
       const formData = new FormData();
       formData.append("lecture_pdf", file);
       
-      // Append exam settings to the request
-      formData.append("mcq_count", config.mcqCount.toString());
-      formData.append("short_answer_count", config.shortAnswerCount.toString());
-      formData.append("long_question_count", config.longQuestionCount.toString());
+      // Append exam settings to the request (send 0 for disabled types)
+      formData.append("mcq_count", config.mcqEnabled ? config.mcqCount.toString() : "0");
+      formData.append("short_answer_count", config.shortAnswerEnabled ? config.shortAnswerCount.toString() : "0");
+      formData.append("long_question_count", config.longQuestionEnabled ? config.longQuestionCount.toString() : "0");
       formData.append("difficulty", config.difficulty);
 
       // Get token if available (optional for guest users)

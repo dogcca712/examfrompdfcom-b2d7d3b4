@@ -1,8 +1,11 @@
 export type Difficulty = "easy" | "normal" | "hard";
 
 export interface ExamConfig {
+  mcqEnabled: boolean;
   mcqCount: number;
+  shortAnswerEnabled: boolean;
   shortAnswerCount: number;
+  longQuestionEnabled: boolean;
   longQuestionCount: number;
   difficulty: Difficulty;
 }
@@ -23,8 +26,11 @@ export interface ExamJob {
 }
 
 export const defaultExamConfig: ExamConfig = {
+  mcqEnabled: true,
   mcqCount: 10,
+  shortAnswerEnabled: true,
   shortAnswerCount: 3,
+  longQuestionEnabled: true,
   longQuestionCount: 1,
   difficulty: "normal",
 };
