@@ -314,7 +314,7 @@ export function GeneratePanel({
     } finally {
       setIsGenerating(false);
     }
-  }, [file, usage, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage]);
+  }, [file, config, usage, isAuthenticated, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage]);
 
   const handleGenerate = async () => {
     if (!file) return;
