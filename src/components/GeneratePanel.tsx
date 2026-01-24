@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { FileUpload } from "./FileUpload";
 import { ExamSettings } from "./ExamSettings";
 import { ProgressTimeline } from "./ProgressTimeline";
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ExamConfig, ExamJob, defaultExamConfig } from "@/types/exam";
 import { useAuth } from "@/contexts/AuthContext";
 import { API_BASE, getAccessToken } from "@/lib/api";
+import { downloadPdfWithAuth } from "@/lib/download";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const POLL_INTERVAL = 2000; // 2 seconds
@@ -326,15 +328,16 @@ export function GeneratePanel({
     handleGenerate();
   };
 
-  const handleDownload = () => {
-    if (selectedJob?.downloadUrl) {
-      // Download URL is now a direct API endpoint
-      const link = document.createElement("a");
-      link.href = selectedJob.downloadUrl;
-      link.download = `${selectedJob.fileName.replace(/\.pdf$/i, "")}_exam.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  const handleDownload = async () => {
+    if (selectedJob?.jobId) {
+      const examFileName = `${selectedJob.fileName.replace(/\.pdf$/i, "")}_exam.pdf`;
+      try {
+        await downloadPdfWithAuth(`/download/${selectedJob.jobId}`, examFileName);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Download failed";
+        console.error("Download failed:", err);
+        toast.error(message);
+      }
     }
   };
 
