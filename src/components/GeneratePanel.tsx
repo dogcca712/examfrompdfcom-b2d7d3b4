@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ExamConfig, ExamJob, defaultExamConfig } from "@/types/exam";
 import { useAuth } from "@/contexts/AuthContext";
 import { API_BASE, getAccessToken } from "@/lib/api";
-import { downloadPdfWithAuth } from "@/lib/download";
+import { downloadPdfWithAuth, isLineInAppBrowser } from "@/lib/download";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const POLL_INTERVAL = 2000; // 2 seconds
@@ -330,6 +330,15 @@ export function GeneratePanel({
 
   const handleDownload = async () => {
     if (selectedJob?.jobId) {
+      // Check if running in Line's in-app browser
+      if (isLineInAppBrowser()) {
+        toast.error(
+          "Line 内置浏览器不支持下载文件。请点击右上角菜单，选择「在浏览器中打开」后重试。",
+          { duration: 8000 }
+        );
+        return;
+      }
+      
       const token = getAccessToken();
       console.log("[handleDownload] Starting download for job:", selectedJob.jobId);
       console.log("[handleDownload] Token exists:", !!token);

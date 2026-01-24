@@ -34,6 +34,14 @@ function parseFilenameFromContentDisposition(header: string | null): string | nu
   return null;
 }
 
+/**
+ * Detects if the current browser is Line's in-app browser
+ */
+export function isLineInAppBrowser(): boolean {
+  const ua = navigator.userAgent || "";
+  return /Line\//i.test(ua);
+}
+
 export async function downloadPdfWithAuth(url: string, fallbackFileName: string) {
   const token = getAccessToken();
   const resolvedUrl = appendCacheBuster(resolveApiUrl(url));
