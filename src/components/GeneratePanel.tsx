@@ -330,14 +330,21 @@ export function GeneratePanel({
 
   const handleDownload = async () => {
     if (selectedJob?.jobId) {
+      const token = getAccessToken();
+      console.log("[handleDownload] Starting download for job:", selectedJob.jobId);
+      console.log("[handleDownload] Token exists:", !!token);
+      
       const examFileName = `${selectedJob.fileName.replace(/\.pdf$/i, "")}_exam.pdf`;
       try {
         await downloadPdfWithAuth(`/download/${selectedJob.jobId}`, examFileName);
+        console.log("[handleDownload] Download completed successfully");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Download failed";
-        console.error("Download failed:", err);
+        console.error("[handleDownload] Download failed:", err);
         toast.error(message);
       }
+    } else {
+      console.warn("[handleDownload] No jobId available, selectedJob:", selectedJob);
     }
   };
 
