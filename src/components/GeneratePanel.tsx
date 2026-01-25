@@ -41,6 +41,10 @@ export function GeneratePanel({
   // Payment state for per-download purchases
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [unlockedJobs, setUnlockedJobs] = useState<Set<string>>(new Set());
+  
+  // Answer key generation state (deferred until after payment)
+  const [isGeneratingAnswerKey, setIsGeneratingAnswerKey] = useState(false);
+  const [answerKeyReady, setAnswerKeyReady] = useState(false);
 
   const steps = [
     { id: "extract", label: "Extracting text" },
@@ -332,16 +336,12 @@ export function GeneratePanel({
     }
   };
 
-  // Handle unlock purchase
+  // Handle unlock purchase - triggers answer key generation after payment
   const handleUnlockPurchase = async () => {
     if (!selectedJob?.jobId) return;
     
     setIsPurchasing(true);
     try {
-      // TODO: Integrate with Stripe for $0.99 payment
-      // For now, simulate the payment process
-      // Backend endpoint: POST /payments/purchase-download with { job_id }
-      
       const token = getAccessToken();
       const headers: HeadersInit = {
         "Content-Type": "application/json",
@@ -369,9 +369,12 @@ export function GeneratePanel({
         return;
       }
       
-      // If payment was processed directly, mark as unlocked
+      // Payment successful - mark as unlocked and start answer key generation
       setUnlockedJobs(prev => new Set(prev).add(selectedJob.jobId));
-      toast.success("Payment successful! You can now download your exam.");
+      toast.success("Payment successful! Generating answer key...");
+      
+      // Start generating answer key
+      await generateAnswerKey(selectedJob.jobId);
       
     } catch (err) {
       const message = err instanceof Error ? err.message : "Payment failed";
@@ -379,6 +382,81 @@ export function GeneratePanel({
     } finally {
       setIsPurchasing(false);
     }
+  };
+
+  // Generate answer key after payment
+  const generateAnswerKey = async (jobId: string) => {
+    setIsGeneratingAnswerKey(true);
+    setAnswerKeyReady(false);
+    
+    try {
+      const token = getAccessToken();
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      
+      // Tell backend to start generating answer key
+      const response = await fetch(`${API_BASE}/generate_answer/${jobId}`, {
+        method: "POST",
+        headers,
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to start answer key generation");
+      }
+      
+      // Poll for answer key completion
+      await pollAnswerKeyStatus(jobId);
+      
+      setAnswerKeyReady(true);
+      toast.success("Answer key is ready!");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to generate answer key";
+      toast.error(message);
+      // Still mark as ready to allow retry via download button
+      setAnswerKeyReady(true);
+    } finally {
+      setIsGeneratingAnswerKey(false);
+    }
+  };
+
+  // Poll for answer key generation status
+  const pollAnswerKeyStatus = async (jobId: string): Promise<void> => {
+    const token = getAccessToken();
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    return new Promise((resolve, reject) => {
+      const poll = async () => {
+        try {
+          const response = await fetch(`${API_BASE}/answer_status/${jobId}`, { headers });
+          
+          if (!response.ok) {
+            throw new Error("Failed to check answer key status");
+          }
+          
+          const result = await response.json();
+          
+          if (result.status === "done") {
+            resolve();
+          } else if (result.status === "failed") {
+            reject(new Error(result.error || "Answer key generation failed"));
+          } else {
+            // Still generating, keep polling
+            setTimeout(poll, POLL_INTERVAL);
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      poll();
+    });
   };
 
   // Store files and config for regeneration
@@ -432,6 +510,8 @@ export function GeneratePanel({
           onUnlockPurchase={handleUnlockPurchase}
           isUnlocked={isCurrentJobUnlocked}
           isPurchasing={isPurchasing}
+          isGeneratingAnswerKey={isGeneratingAnswerKey}
+          answerKeyReady={answerKeyReady}
         />
       </div>
     );
