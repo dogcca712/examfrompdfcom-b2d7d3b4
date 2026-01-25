@@ -8,6 +8,7 @@ export interface ExamConfig {
   longQuestionEnabled: boolean;
   longQuestionCount: number;
   difficulty: Difficulty;
+  specialRequests: string;
 }
 
 export type JobStatus = "queued" | "running" | "done" | "failed";
@@ -33,4 +34,5 @@ export const defaultExamConfig: ExamConfig = {
   longQuestionEnabled: true,
   longQuestionCount: 1,
   difficulty: "normal",
+  specialRequests: "",
 };
