@@ -1,26 +1,33 @@
-import { FileText, Download, RefreshCw, Calendar, File, BookOpen } from "lucide-react";
+import { FileText, Lock, RefreshCw, Calendar, File } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExamJob } from "@/types/exam";
-import { ProUpsellCard } from "./ProUpsellCard";
 import { useAuth } from "@/contexts/AuthContext";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { API_BASE, getAccessToken } from "@/lib/api";
 import { useState, useEffect } from "react";
+import { UnlockPaymentDialog } from "./UnlockPaymentDialog";
 
 interface ExamResultProps {
   job: ExamJob;
   onDownload: () => void;
   onDownloadAnswerKey: () => void;
   onRegenerate: () => void;
+  onUnlockPurchase: () => void;
+  isUnlocked?: boolean;
+  isPurchasing?: boolean;
 }
 
-export function ExamResult({ job, onDownload, onDownloadAnswerKey, onRegenerate }: ExamResultProps) {
-  const { isAuthenticated, user } = useAuth();
+export function ExamResult({ 
+  job, 
+  onDownload, 
+  onDownloadAnswerKey, 
+  onRegenerate,
+  onUnlockPurchase,
+  isUnlocked = false,
+  isPurchasing = false,
+}: ExamResultProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
-  
-  // Show upsell for guests or free plan users
-  const showUpsell = !isAuthenticated || user?.plan === "free";
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
@@ -70,6 +77,22 @@ export function ExamResult({ job, onDownload, onDownloadAnswerKey, onRegenerate 
       }
     };
   }, [job.jobId]);
+
+  const handleLockedButtonClick = () => {
+    setShowPaymentDialog(true);
+  };
+
+  const handlePurchase = () => {
+    onUnlockPurchase();
+    // Dialog will close when isPurchasing changes or payment completes
+  };
+
+  // Close dialog when purchase completes (isUnlocked becomes true)
+  useEffect(() => {
+    if (isUnlocked) {
+      setShowPaymentDialog(false);
+    }
+  }, [isUnlocked]);
 
   return (
     <div className="space-y-6">
@@ -130,28 +153,43 @@ export function ExamResult({ job, onDownload, onDownloadAnswerKey, onRegenerate 
         </div>
       </div>
 
-      {/* Download and Regenerate Actions */}
+      {/* Download Actions - Locked or Unlocked */}
       <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-3 sm:flex-row">
+        {isUnlocked ? (
+          // Unlocked state - show download buttons
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button
+              onClick={onDownload}
+              size="lg"
+              variant="gradient"
+              className="flex-1"
+            >
+              <Lock className="mr-2 h-4 w-4" />
+              Download PDF
+            </Button>
+            <Button
+              onClick={onDownloadAnswerKey}
+              size="lg"
+              variant="outline"
+              className="flex-1"
+            >
+              <Lock className="mr-2 h-4 w-4" />
+              Download Answer Key
+            </Button>
+          </div>
+        ) : (
+          // Locked state - show payment prompt
           <Button
-            onClick={onDownload}
+            onClick={handleLockedButtonClick}
             size="lg"
             variant="gradient"
-            className="flex-1"
+            className="w-full"
           >
-            <Download className="mr-2 h-4 w-4" />
-            Download PDF
+            <Lock className="mr-2 h-4 w-4" />
+            Unlock for $0.99 — Download Exam + Answer Key
           </Button>
-          <Button
-            onClick={onDownloadAnswerKey}
-            size="lg"
-            variant="outline"
-            className="flex-1"
-          >
-            <BookOpen className="mr-2 h-4 w-4" />
-            Download Answer Key
-          </Button>
-        </div>
+        )}
+        
         <Button
           onClick={onRegenerate}
           size="lg"
@@ -163,8 +201,13 @@ export function ExamResult({ job, onDownload, onDownloadAnswerKey, onRegenerate 
         </Button>
       </div>
 
-      {/* Show Pro upsell for guests and free users */}
-      {showUpsell && <ProUpsellCard />}
+      {/* Payment Dialog */}
+      <UnlockPaymentDialog
+        open={showPaymentDialog}
+        onOpenChange={setShowPaymentDialog}
+        onPurchase={handlePurchase}
+        isLoading={isPurchasing}
+      />
     </div>
   );
 }

@@ -9,17 +9,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, CreditCard, Zap } from "lucide-react";
-import { PLAN_NAMES } from "@/types/auth";
+import { User, LogOut, Zap } from "lucide-react";
 
 export function UserMenu() {
-  const { user, usage, logout, isAuthenticated } = useAuth();
-
-  const usageDisplay = usage
-    ? usage.daily_limit === Infinity
-      ? `${usage.monthly_used}/${usage.monthly_limit} this month`
-      : `${usage.daily_used}/${usage.daily_limit} today`
-    : null;
+  const { user, logout, isAuthenticated } = useAuth();
 
   return (
     <DropdownMenu>
@@ -34,27 +27,8 @@ export function UserMenu() {
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{user?.email}</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user?.plan ? PLAN_NAMES[user.plan] : "Free"} Plan
-                </p>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {usageDisplay && (
-              <>
-                <DropdownMenuItem disabled className="text-xs text-muted-foreground">
-                  <Zap className="mr-2 h-4 w-4" />
-                  {usageDisplay}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-              </>
-            )}
-            <DropdownMenuItem asChild>
-              <Link to="/pricing" className="cursor-pointer">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Upgrade Plan
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => logout()}

@@ -7,8 +7,6 @@ import { ProgressTimeline } from "./ProgressTimeline";
 import { ExamResult } from "./ExamResult";
 import { ErrorDisplay } from "./ErrorDisplay";
 import { ExpiredJobDisplay } from "./ExpiredJobDisplay";
-import { UsageBanner } from "./UsageBanner";
-import { ProUpsellCard } from "./ProUpsellCard";
 import { Button } from "@/components/ui/button";
 import { ExamConfig, ExamJob, defaultExamConfig, isJobExpired } from "@/types/exam";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,7 +29,7 @@ export function GeneratePanel({
   onJobUpdate,
   onClearSelection,
 }: GeneratePanelProps) {
-  const { usage, refreshUsage, isAuthenticated } = useAuth();
+  const { refreshUsage, isAuthenticated } = useAuth();
   const [files, setFiles] = useState<File[]>([]);
   const [config, setConfig] = useState<ExamConfig>(defaultExamConfig);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -40,6 +38,9 @@ export function GeneratePanel({
     null
   );
   
+  // Payment state for per-download purchases
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [unlockedJobs, setUnlockedJobs] = useState<Set<string>>(new Set());
 
   const steps = [
     { id: "extract", label: "Extracting text" },
@@ -114,41 +115,8 @@ export function GeneratePanel({
     });
   }, [steps.length]);
 
-  const triggerDownload = async (jobId: string, fileName: string) => {
-    const downloadUrl = `${API_BASE}/download/${jobId}?t=${Date.now()}`;
-    const headers: HeadersInit = {};
-    const token = getAccessToken();
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-    
-    const response = await fetch(downloadUrl, { headers });
-    if (!response.ok) {
-      throw new Error(`Download failed (${response.status})`);
-    }
-    
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(blobUrl);
-  };
-
   const generateExam = useCallback(async () => {
     if (files.length === 0) return;
-
-    // Check usage limits (only for authenticated users with usage data)
-    if (isAuthenticated && usage && !usage.can_generate) {
-      setError({
-        message: "Usage limit reached",
-        details: "You've reached your plan's limit. Please upgrade to continue generating exams.",
-      });
-      return;
-    }
 
     // Validate all files
     for (const file of files) {
@@ -237,7 +205,6 @@ export function GeneratePanel({
         const errorText = await response.text().catch(() => "Unknown error");
         
         // Provide more specific error messages
-        // Note: 401 is OK for anonymous users, they can still upload
         if (response.status === 401 && isAuthenticated) {
           throw new Error("Authentication failed. Please log in again.");
         } else if (response.status === 403) {
@@ -266,20 +233,13 @@ export function GeneratePanel({
       setCurrentStep(1);
       await pollJobStatus(jobId, updatedJob);
 
-      // Step 3: Trigger download
-      const baseFileName = files[0].name.replace(/\.pdf$/i, "");
-      const examFileName = files.length > 1 
-        ? `combined_exam.pdf` 
-        : `${baseFileName}_exam.pdf`;
-      triggerDownload(jobId, examFileName);
-
-      // Update job as completed
+      // Update job as completed (no auto-download - user needs to pay first)
       const completedJob: ExamJob = {
         ...updatedJob,
         status: "done",
         examTitle: files.length > 1 
           ? `Practice Exam: ${files.length} PDFs Combined`
-          : `Practice Exam: ${baseFileName}`,
+          : `Practice Exam: ${files[0].name.replace(/\.pdf$/i, "")}`,
         courseCode: "Generated",
         downloadUrl: `${API_BASE}/download/${jobId}?t=${Date.now()}`,
       };
@@ -323,7 +283,7 @@ export function GeneratePanel({
     } finally {
       setIsGenerating(false);
     }
-  }, [files, config, usage, isAuthenticated, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage]);
+  }, [files, config, isAuthenticated, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage]);
 
   const handleRetry = () => {
     setError(null);
@@ -341,21 +301,13 @@ export function GeneratePanel({
         return;
       }
       
-      const token = getAccessToken();
-      console.log("[handleDownload] Starting download for job:", selectedJob.jobId);
-      console.log("[handleDownload] Token exists:", !!token);
-      
       const examFileName = `${selectedJob.fileName.replace(/\.pdf$/i, "")}_exam.pdf`;
       try {
         await downloadPdfWithAuth(`/download/${selectedJob.jobId}`, examFileName);
-        console.log("[handleDownload] Download completed successfully");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Download failed";
-        console.error("[handleDownload] Download failed:", err);
         toast.error(message);
       }
-    } else {
-      console.warn("[handleDownload] No jobId available, selectedJob:", selectedJob);
     }
   };
 
@@ -370,21 +322,62 @@ export function GeneratePanel({
         return;
       }
       
-      const token = getAccessToken();
-      console.log("[handleDownloadAnswerKey] Starting download for job:", selectedJob.jobId);
-      console.log("[handleDownloadAnswerKey] Token exists:", !!token);
-      
       const answerFileName = `${selectedJob.fileName.replace(/\.pdf$/i, "")}_answer_key.pdf`;
       try {
         await downloadPdfWithAuth(`/download_answer/${selectedJob.jobId}`, answerFileName);
-        console.log("[handleDownloadAnswerKey] Download completed successfully");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Download failed";
-        console.error("[handleDownloadAnswerKey] Download failed:", err);
         toast.error(message);
       }
-    } else {
-      console.warn("[handleDownloadAnswerKey] No jobId available, selectedJob:", selectedJob);
+    }
+  };
+
+  // Handle unlock purchase
+  const handleUnlockPurchase = async () => {
+    if (!selectedJob?.jobId) return;
+    
+    setIsPurchasing(true);
+    try {
+      // TODO: Integrate with Stripe for $0.99 payment
+      // For now, simulate the payment process
+      // Backend endpoint: POST /payments/purchase-download with { job_id }
+      
+      const token = getAccessToken();
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`${API_BASE}/payments/purchase-download`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ job_id: selectedJob.jobId }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Payment failed");
+        throw new Error(errorText);
+      }
+      
+      const data = await response.json();
+      
+      // If backend returns a checkout URL, redirect to Stripe
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+        return;
+      }
+      
+      // If payment was processed directly, mark as unlocked
+      setUnlockedJobs(prev => new Set(prev).add(selectedJob.jobId));
+      toast.success("Payment successful! You can now download your exam.");
+      
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Payment failed";
+      toast.error(message);
+    } finally {
+      setIsPurchasing(false);
     }
   };
 
@@ -413,6 +406,9 @@ export function GeneratePanel({
     await generateExam();
   };
 
+  // Check if current job is unlocked
+  const isCurrentJobUnlocked = selectedJob?.jobId ? unlockedJobs.has(selectedJob.jobId) : false;
+
   // Show expired state for old jobs
   if (selectedJob?.status === "done" && isJobExpired(selectedJob) && !isGenerating) {
     return (
@@ -431,6 +427,9 @@ export function GeneratePanel({
           onDownload={handleDownload}
           onDownloadAnswerKey={handleDownloadAnswerKey}
           onRegenerate={handleRegenerate}
+          onUnlockPurchase={handleUnlockPurchase}
+          isUnlocked={isCurrentJobUnlocked}
+          isPurchasing={isPurchasing}
         />
       </div>
     );
@@ -485,8 +484,6 @@ export function GeneratePanel({
       </div>
 
       <div className="space-y-6">
-        <UsageBanner />
-        
         <FileUpload
           files={files}
           onFilesChange={setFiles}
@@ -495,14 +492,12 @@ export function GeneratePanel({
 
         {files.length > 0 && (
           <>
-            {/* Only show settings for authenticated users (Pro feature) */}
-            {isAuthenticated && (
-              <ExamSettings
-                config={config}
-                onChange={setConfig}
-                disabled={isGenerating}
-              />
-            )}
+            {/* Show settings for all users */}
+            <ExamSettings
+              config={config}
+              onChange={setConfig}
+              disabled={isGenerating}
+            />
 
             <Button
               onClick={handleGenerate}
@@ -515,12 +510,10 @@ export function GeneratePanel({
               Generate Exam
             </Button>
 
-            {/* Show hint for guests */}
-            {!isAuthenticated && (
-              <p className="text-center text-sm text-muted-foreground">
-                🔓 Log in to customize question count and difficulty
-              </p>
-            )}
+            {/* Pricing info */}
+            <p className="text-center text-sm text-muted-foreground">
+              💰 $0.99 per exam download (includes answer key)
+            </p>
           </>
         )}
       </div>
