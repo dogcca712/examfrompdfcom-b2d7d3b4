@@ -95,7 +95,7 @@ export function ExamResult({ job, onDownload, onRegenerate }: ExamResultProps) {
         </div>
         
         {/* PDF Preview Area */}
-        <div className="h-[400px] w-full bg-muted/20">
+        <div className="h-[600px] w-full bg-muted/20">
           {isLoadingPdf ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
