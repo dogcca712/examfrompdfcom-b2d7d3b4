@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { ChevronDown, Settings, ListChecks, MessageSquare, FileText } from "lucide-react";
+import { ChevronDown, Settings, ListChecks, MessageSquare, FileText, Lightbulb } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -266,6 +267,26 @@ export function ExamSettings({ config, onChange, disabled }: ExamSettingsProps) 
                   <SelectItem value="hard">Hard</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Special Requests */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-primary" />
+                <Label>Special Requests</Label>
+                <span className="text-xs text-muted-foreground">(optional)</span>
+              </div>
+              <Textarea
+                placeholder="e.g., Focus more on calculus problems, fewer definition questions, include more application-based scenarios..."
+                value={config.specialRequests}
+                onChange={(e) => updateConfig({ specialRequests: e.target.value })}
+                disabled={disabled}
+                className="min-h-[80px] resize-none"
+                maxLength={500}
+              />
+              <p className="text-xs text-muted-foreground text-right">
+                {config.specialRequests.length}/500
+              </p>
             </div>
           </div>
         </div>

@@ -209,6 +209,9 @@ export function GeneratePanel({
       formData.append("short_answer_count", config.shortAnswerEnabled ? config.shortAnswerCount.toString() : "0");
       formData.append("long_question_count", config.longQuestionEnabled ? config.longQuestionCount.toString() : "0");
       formData.append("difficulty", config.difficulty);
+      if (config.specialRequests.trim()) {
+        formData.append("special_requests", config.specialRequests.trim());
+      }
 
       // Get token if available (optional for guest users)
       const token = getAccessToken();
@@ -331,14 +334,9 @@ export function GeneratePanel({
     }
   }, [files, config, usage, isAuthenticated, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage]);
 
-  const handleGenerate = async () => {
-    if (files.length === 0) return;
-    await generateExam();
-  };
-
   const handleRetry = () => {
     setError(null);
-    handleGenerate();
+    generateExam();
   };
 
   const handleDownload = async () => {
@@ -370,13 +368,29 @@ export function GeneratePanel({
     }
   };
 
+  // Store files and config for regeneration
+  const [savedFiles, setSavedFiles] = useState<File[]>([]);
+  const [savedConfig, setSavedConfig] = useState<ExamConfig | null>(null);
+
   const handleRegenerate = () => {
     if (selectedJob) {
-      // Note: For regeneration, user needs to re-upload the file
-      // since we don't store the original file
+      // Restore saved files and config, allowing user to modify settings
+      if (savedFiles.length > 0) {
+        setFiles(savedFiles);
+      }
+      if (savedConfig) {
+        setConfig(savedConfig);
+      }
       setError(null);
-      setFiles([]);
     }
+  };
+
+  // Save files and config before generating
+  const handleGenerate = async () => {
+    if (files.length === 0) return;
+    setSavedFiles([...files]);
+    setSavedConfig({ ...config });
+    await generateExam();
   };
 
   // Show result for completed job
