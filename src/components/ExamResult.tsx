@@ -94,8 +94,8 @@ export function ExamResult({ job, onDownload, onRegenerate }: ExamResultProps) {
           </div>
         </div>
         
-        {/* Scrollable PDF Preview Area */}
-        <ScrollArea className="h-[400px] w-full">
+        {/* PDF Preview Area */}
+        <div className="h-[400px] w-full bg-muted/20">
           {isLoadingPdf ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
@@ -104,11 +104,19 @@ export function ExamResult({ job, onDownload, onRegenerate }: ExamResultProps) {
               </div>
             </div>
           ) : pdfUrl ? (
-            <iframe
-              src={`${pdfUrl}#toolbar=0&navpanes=0`}
-              className="w-full h-[400px] border-0"
-              title="PDF Preview"
-            />
+            <object
+              data={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1`}
+              type="application/pdf"
+              className="w-full h-full"
+            >
+              <div className="flex h-full items-center justify-center p-8">
+                <div className="text-center text-muted-foreground">
+                  <File className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>Browser does not support PDF preview</p>
+                  <p className="text-sm">Click download to get your exam</p>
+                </div>
+              </div>
+            </object>
           ) : (
             <div className="flex h-full items-center justify-center p-8">
               <div className="text-center text-muted-foreground">
@@ -118,7 +126,7 @@ export function ExamResult({ job, onDownload, onRegenerate }: ExamResultProps) {
               </div>
             </div>
           )}
-        </ScrollArea>
+        </div>
       </div>
 
       {/* Download and Regenerate Actions */}
