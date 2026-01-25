@@ -7,12 +7,13 @@ import {
   Clock,
   Download,
   Trash2,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/UserMenu";
-import { ExamJob } from "@/types/exam";
+import { ExamJob, isJobExpired } from "@/types/exam";
 import { cn } from "@/lib/utils";
 import { downloadPdfWithAuth } from "@/lib/download";
 
@@ -54,6 +55,8 @@ export function Sidebar({
     switch (status) {
       case "done":
         return "text-success";
+      case "expired":
+        return "text-muted-foreground";
       case "failed":
         return "text-destructive";
       case "running":
@@ -62,6 +65,13 @@ export function Sidebar({
       default:
         return "text-muted-foreground";
     }
+  };
+
+  const getDisplayStatus = (job: ExamJob): string => {
+    if (job.status === "done" && isJobExpired(job)) {
+      return "expired";
+    }
+    return job.status;
   };
 
   return (
@@ -134,20 +144,32 @@ export function Sidebar({
                   No exams generated yet
                 </p>
               ) : (
-                jobs.map((job) => (
+                jobs.map((job) => {
+                  const displayStatus = getDisplayStatus(job);
+                  const jobExpired = displayStatus === "expired";
+                  
+                  return (
                   <div
                     key={job.id}
                     className={cn(
                       "group relative flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors hover:bg-sidebar-accent",
-                      selectedJobId === job.id && "bg-sidebar-accent"
+                      selectedJobId === job.id && "bg-sidebar-accent",
+                      jobExpired && "opacity-60"
                     )}
                     onClick={() => {
                       onSelectJob(job.id);
                       setIsOpen(false);
                     }}
                   >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
+                    <div className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
+                      jobExpired ? "bg-muted" : "bg-secondary"
+                    )}>
+                      {jobExpired ? (
+                        <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-sidebar-foreground">
@@ -158,13 +180,13 @@ export function Sidebar({
                         <span className="text-muted-foreground">
                           {formatDate(job.createdAt)}
                         </span>
-                        <span className={cn("capitalize", getStatusColor(job.status))}>
-                          {job.status}
+                        <span className={cn("capitalize", getStatusColor(displayStatus as ExamJob["status"]))}>
+                          {displayStatus}
                         </span>
                       </div>
                     </div>
                     <div className="flex opacity-0 transition-opacity group-hover:opacity-100">
-                      {job.status === "done" && job.downloadUrl && (
+                      {job.status === "done" && job.downloadUrl && !jobExpired && (
                         <Button
                           variant="ghost"
                           size="icon"
@@ -204,7 +226,8 @@ export function Sidebar({
                       </Button>
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -212,7 +235,7 @@ export function Sidebar({
           {/* Footer */}
           <div className="border-t border-sidebar-border p-4">
             <p className="text-xs text-muted-foreground">
-              Files auto-delete after 24 hours. We don't store your lecture content
+              Files auto-delete after 7 days. We don't store your lecture content
               permanently.
             </p>
           </div>
