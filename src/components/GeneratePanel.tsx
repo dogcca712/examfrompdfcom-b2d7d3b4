@@ -359,6 +359,35 @@ export function GeneratePanel({
     }
   };
 
+  // Handle answer key download
+  const handleDownloadAnswerKey = async () => {
+    if (selectedJob?.jobId) {
+      if (isLineInAppBrowser()) {
+        toast.error(
+          "Line browser does not support downloads. Please tap ⋮ in the top right and select 'Open in Browser'",
+          { duration: 8000 }
+        );
+        return;
+      }
+      
+      const token = getAccessToken();
+      console.log("[handleDownloadAnswerKey] Starting download for job:", selectedJob.jobId);
+      console.log("[handleDownloadAnswerKey] Token exists:", !!token);
+      
+      const answerFileName = `${selectedJob.fileName.replace(/\.pdf$/i, "")}_answer_key.pdf`;
+      try {
+        await downloadPdfWithAuth(`/download/${selectedJob.jobId}/answer`, answerFileName);
+        console.log("[handleDownloadAnswerKey] Download completed successfully");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Download failed";
+        console.error("[handleDownloadAnswerKey] Download failed:", err);
+        toast.error(message);
+      }
+    } else {
+      console.warn("[handleDownloadAnswerKey] No jobId available, selectedJob:", selectedJob);
+    }
+  };
+
   // Store files and config for regeneration
   const [savedFiles, setSavedFiles] = useState<File[]>([]);
   const [savedConfig, setSavedConfig] = useState<ExamConfig | null>(null);
@@ -400,6 +429,7 @@ export function GeneratePanel({
         <ExamResult
           job={selectedJob}
           onDownload={handleDownload}
+          onDownloadAnswerKey={handleDownloadAnswerKey}
           onRegenerate={handleRegenerate}
         />
       </div>

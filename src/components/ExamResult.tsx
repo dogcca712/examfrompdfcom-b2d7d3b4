@@ -1,4 +1,4 @@
-import { FileText, Download, RefreshCw, Calendar, File } from "lucide-react";
+import { FileText, Download, RefreshCw, Calendar, File, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExamJob } from "@/types/exam";
 import { ProUpsellCard } from "./ProUpsellCard";
@@ -10,10 +10,11 @@ import { useState, useEffect } from "react";
 interface ExamResultProps {
   job: ExamJob;
   onDownload: () => void;
+  onDownloadAnswerKey: () => void;
   onRegenerate: () => void;
 }
 
-export function ExamResult({ job, onDownload, onRegenerate }: ExamResultProps) {
+export function ExamResult({ job, onDownload, onDownloadAnswerKey, onRegenerate }: ExamResultProps) {
   const { isAuthenticated, user } = useAuth();
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
@@ -130,21 +131,32 @@ export function ExamResult({ job, onDownload, onRegenerate }: ExamResultProps) {
       </div>
 
       {/* Download and Regenerate Actions */}
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button
-          onClick={onDownload}
-          size="lg"
-          variant="gradient"
-          className="flex-1"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Download PDF
-        </Button>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            onClick={onDownload}
+            size="lg"
+            variant="gradient"
+            className="flex-1"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Download PDF
+          </Button>
+          <Button
+            onClick={onDownloadAnswerKey}
+            size="lg"
+            variant="outline"
+            className="flex-1"
+          >
+            <BookOpen className="mr-2 h-4 w-4" />
+            Download Answer Key
+          </Button>
+        </div>
         <Button
           onClick={onRegenerate}
           size="lg"
-          variant="outline"
-          className="flex-1"
+          variant="ghost"
+          className="w-full"
         >
           <RefreshCw className="mr-2 h-4 w-4" />
           Generate another version
