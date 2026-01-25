@@ -376,7 +376,7 @@ export function GeneratePanel({
       
       const answerFileName = `${selectedJob.fileName.replace(/\.pdf$/i, "")}_answer_key.pdf`;
       try {
-        await downloadPdfWithAuth(`/download/${selectedJob.jobId}/answer`, answerFileName);
+        await downloadPdfWithAuth(`/download_answer/${selectedJob.jobId}`, answerFileName);
         console.log("[handleDownloadAnswerKey] Download completed successfully");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Download failed";
