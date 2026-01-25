@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Upload, FileText, X, Sparkles, Plus, Files } from "lucide-react";
+import { Upload, FileText, X, Plus, Files } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -9,14 +9,12 @@ const MAX_FILES = 20;
 interface FileUploadProps {
   files: File[];
   onFilesChange: (files: File[]) => void;
-  onTrySample: () => void;
   disabled?: boolean;
 }
 
 export function FileUpload({
   files,
   onFilesChange,
-  onTrySample,
   disabled,
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -255,17 +253,6 @@ export function FileUpload({
         </div>
       </div>
 
-      <div className="flex items-center justify-center">
-        <Button
-          variant="ghost"
-          onClick={onTrySample}
-          disabled={disabled}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Sparkles className="mr-2 h-4 w-4" />
-          Try a sample PDF
-        </Button>
-      </div>
     </div>
   );
 }
