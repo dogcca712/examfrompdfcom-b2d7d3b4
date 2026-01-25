@@ -1,4 +1,4 @@
-import { Lock, Download, BookOpen, CreditCard } from "lucide-react";
+import { Lock, Download, BookOpen, CreditCard, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,62 +23,78 @@ export function UnlockPaymentDialog({
 }: UnlockPaymentDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-            <Lock className="h-8 w-8 text-primary" />
+      <DialogContent className="sm:max-w-md border-orange-500/50 overflow-hidden">
+        {/* Gradient background accent */}
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-red-500/5 to-transparent pointer-events-none" />
+        
+        <DialogHeader className="relative">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500 mb-4 shadow-lg shadow-orange-500/30 animate-pulse">
+            <Lock className="h-10 w-10 text-white" />
           </div>
-          <DialogTitle className="text-center text-xl">
-            Unlock Your Exam
+          <DialogTitle className="text-center text-2xl font-bold">
+            🔓 Unlock Your Exam!
           </DialogTitle>
-          <DialogDescription className="text-center">
+          <DialogDescription className="text-center text-base">
             Your exam is ready! Pay once to download both files.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {/* Price Display */}
-          <div className="text-center">
-            <div className="text-4xl font-bold text-foreground">$0.99</div>
-            <p className="text-sm text-muted-foreground mt-1">One-time payment</p>
+        <div className="space-y-4 py-4 relative">
+          {/* Price Display - Big and Bold */}
+          <div className="text-center py-4 rounded-xl bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/20 border border-orange-500/30">
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles className="h-6 w-6 text-orange-500 animate-pulse" />
+              <span className="text-5xl font-black bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                $0.99
+              </span>
+              <Sparkles className="h-6 w-6 text-red-500 animate-pulse" />
+            </div>
+            <p className="text-sm text-muted-foreground mt-2 font-medium">
+              ⚡ One-time payment • Instant access
+            </p>
           </div>
 
           {/* What's Included */}
-          <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
-            <h4 className="font-medium text-sm text-foreground">Includes:</h4>
+          <div className="rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-red-500/5 p-4 space-y-3">
+            <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
+              <span className="text-lg">🎁</span> What You Get:
+            </h4>
             <div className="flex items-center gap-3 text-sm">
-              <Download className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-muted-foreground">Practice Exam PDF</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500/20">
+                <Download className="h-4 w-4 text-orange-500" />
+              </div>
+              <span className="font-medium">Practice Exam PDF</span>
             </div>
             <div className="flex items-center gap-3 text-sm">
-              <BookOpen className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-muted-foreground">Answer Key with Explanations</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500/20">
+                <BookOpen className="h-4 w-4 text-red-500" />
+              </div>
+              <span className="font-medium">Answer Key with Full Explanations</span>
             </div>
           </div>
 
-          {/* Purchase Button */}
+          {/* Purchase Button - Eye-catching */}
           <Button
             onClick={onPurchase}
             size="lg"
-            variant="gradient"
-            className="w-full"
+            className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:from-orange-600 hover:via-red-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/40 hover:shadow-orange-500/60 transition-all duration-300 hover:scale-[1.02] animate-pulse hover:animate-none"
             disabled={isLoading}
           >
             {isLoading ? (
               <>
-                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 Processing...
               </>
             ) : (
               <>
-                <CreditCard className="mr-2 h-4 w-4" />
-                Pay $0.99 to Download
+                <CreditCard className="mr-2 h-5 w-5" />
+                🔥 Pay $0.99 — Download Now!
               </>
             )}
           </Button>
 
           <p className="text-center text-xs text-muted-foreground">
-            Secure payment powered by Stripe
+            🔒 Secure payment powered by Stripe
           </p>
         </div>
       </DialogContent>
