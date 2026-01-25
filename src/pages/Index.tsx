@@ -88,6 +88,7 @@ const Index = () => {
             selectedJob={selectedJob}
             onJobCreate={handleJobCreate}
             onJobUpdate={handleJobUpdate}
+            onClearSelection={handleNewExam}
           />
         </div>
       </main>

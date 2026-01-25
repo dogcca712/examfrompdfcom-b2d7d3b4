@@ -21,12 +21,14 @@ interface GeneratePanelProps {
   selectedJob: ExamJob | null;
   onJobCreate: (job: ExamJob) => void;
   onJobUpdate: (job: ExamJob) => void;
+  onClearSelection: () => void;
 }
 
 export function GeneratePanel({
   selectedJob,
   onJobCreate,
   onJobUpdate,
+  onClearSelection,
 }: GeneratePanelProps) {
   const { usage, refreshUsage, isAuthenticated } = useAuth();
   const [files, setFiles] = useState<File[]>([]);
@@ -373,16 +375,16 @@ export function GeneratePanel({
   const [savedConfig, setSavedConfig] = useState<ExamConfig | null>(null);
 
   const handleRegenerate = () => {
-    if (selectedJob) {
-      // Restore saved files and config, allowing user to modify settings
-      if (savedFiles.length > 0) {
-        setFiles(savedFiles);
-      }
-      if (savedConfig) {
-        setConfig(savedConfig);
-      }
-      setError(null);
+    // Restore saved files and config, allowing user to modify settings
+    if (savedFiles.length > 0) {
+      setFiles(savedFiles);
     }
+    if (savedConfig) {
+      setConfig(savedConfig);
+    }
+    setError(null);
+    // Clear selection to go back to upload view
+    onClearSelection();
   };
 
   // Save files and config before generating
@@ -396,7 +398,7 @@ export function GeneratePanel({
   // Show result for completed job
   if (selectedJob?.status === "done" && !isGenerating) {
     return (
-      <div className="mx-auto w-full max-w-[600px] px-4 py-8">
+      <div className="mx-auto w-full max-w-2xl px-4 py-8">
         <ExamResult
           job={selectedJob}
           onDownload={handleDownload}
