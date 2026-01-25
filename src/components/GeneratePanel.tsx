@@ -407,7 +407,9 @@ export function GeneratePanel({
   };
 
   // Check if current job is unlocked
-  const isCurrentJobUnlocked = selectedJob?.jobId ? unlockedJobs.has(selectedJob.jobId) : false;
+  // DEV MODE: Set VITE_MOCK_PAYMENT=true to bypass payment for testing
+  const isMockPaymentEnabled = import.meta.env.VITE_MOCK_PAYMENT === 'true';
+  const isCurrentJobUnlocked = isMockPaymentEnabled || (selectedJob?.jobId ? unlockedJobs.has(selectedJob.jobId) : false);
 
   // Show expired state for old jobs
   if (selectedJob?.status === "done" && isJobExpired(selectedJob) && !isGenerating) {
