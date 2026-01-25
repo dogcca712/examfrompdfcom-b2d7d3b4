@@ -28,7 +28,7 @@ export function UnlockPaymentDialog({
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-red-500/5 to-transparent pointer-events-none" />
         
         <DialogHeader className="relative">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500 mb-4 shadow-lg shadow-orange-500/30 animate-pulse">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500 mb-4 shadow-lg shadow-orange-500/30">
             <Lock className="h-10 w-10 text-white" />
           </div>
           <DialogTitle className="text-center text-2xl font-bold">
@@ -44,16 +44,16 @@ export function UnlockPaymentDialog({
           <div className="text-center py-4 rounded-xl bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/20 border border-orange-500/30">
             <div className="flex items-center justify-center gap-2 mb-1">
               <span className="text-xl text-muted-foreground line-through">$2.00</span>
-              <span className="px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full animate-pulse">
+              <span className="px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full">
                 50% OFF
               </span>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <Sparkles className="h-6 w-6 text-orange-500 animate-pulse" />
+              <Sparkles className="h-6 w-6 text-orange-500" />
               <span className="text-5xl font-black bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
                 $0.99
               </span>
-              <Sparkles className="h-6 w-6 text-red-500 animate-pulse" />
+              <Sparkles className="h-6 w-6 text-red-500" />
             </div>
             <p className="text-sm text-muted-foreground mt-2 font-medium">
               ⚡ Limited time offer • Instant access

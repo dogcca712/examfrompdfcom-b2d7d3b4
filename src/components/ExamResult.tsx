@@ -182,10 +182,10 @@ export function ExamResult({
             <Button
               onClick={handleLockedButtonClick}
               size="lg"
-              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:from-orange-600 hover:via-red-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/40 hover:shadow-orange-500/60 transition-all duration-300 hover:scale-[1.02] animate-pulse hover:animate-none"
+              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:from-orange-600 hover:via-red-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/40 hover:shadow-orange-500/60 transition-all duration-300 hover:scale-[1.02]"
             >
               <Lock className="mr-2 h-5 w-5" />
-              🔥 <span className="line-through opacity-70 mx-1">$2</span> $0.99 — Unlock Exam + Answers!
+              🔥 <span className="line-through opacity-70 mx-1">$2.00</span> $0.99 — Unlock Exam + Answers!
               <Sparkles className="ml-2 h-5 w-5" />
             </Button>
             <p className="text-center text-sm text-muted-foreground">
