@@ -1,7 +1,6 @@
-import { FileText, Lock, RefreshCw, Calendar, File } from "lucide-react";
+import { FileText, Lock, RefreshCw, Calendar, File, Sparkles, Download, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExamJob } from "@/types/exam";
-import { useAuth } from "@/contexts/AuthContext";
 import { API_BASE, getAccessToken } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { UnlockPaymentDialog } from "./UnlockPaymentDialog";
@@ -164,7 +163,7 @@ export function ExamResult({
               variant="gradient"
               className="flex-1"
             >
-              <Lock className="mr-2 h-4 w-4" />
+              <Download className="mr-2 h-4 w-4" />
               Download PDF
             </Button>
             <Button
@@ -173,21 +172,26 @@ export function ExamResult({
               variant="outline"
               className="flex-1"
             >
-              <Lock className="mr-2 h-4 w-4" />
+              <BookOpen className="mr-2 h-4 w-4" />
               Download Answer Key
             </Button>
           </div>
         ) : (
-          // Locked state - show payment prompt
-          <Button
-            onClick={handleLockedButtonClick}
-            size="lg"
-            variant="gradient"
-            className="w-full"
-          >
-            <Lock className="mr-2 h-4 w-4" />
-            Unlock for $0.99 — Download Exam + Answer Key
-          </Button>
+          // Locked state - vibrant payment prompt
+          <div className="space-y-3">
+            <Button
+              onClick={handleLockedButtonClick}
+              size="lg"
+              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:from-orange-600 hover:via-red-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/40 hover:shadow-orange-500/60 transition-all duration-300 hover:scale-[1.02] animate-pulse hover:animate-none"
+            >
+              <Lock className="mr-2 h-5 w-5" />
+              🔥 Unlock for $0.99 — Get Exam + Answers!
+              <Sparkles className="ml-2 h-5 w-5" />
+            </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              💡 One-time payment • Instant download • Includes answer key
+            </p>
+          </div>
         )}
         
         <Button
