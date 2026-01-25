@@ -6,10 +6,11 @@ import { ExamSettings } from "./ExamSettings";
 import { ProgressTimeline } from "./ProgressTimeline";
 import { ExamResult } from "./ExamResult";
 import { ErrorDisplay } from "./ErrorDisplay";
+import { ExpiredJobDisplay } from "./ExpiredJobDisplay";
 import { UsageBanner } from "./UsageBanner";
 import { ProUpsellCard } from "./ProUpsellCard";
 import { Button } from "@/components/ui/button";
-import { ExamConfig, ExamJob, defaultExamConfig } from "@/types/exam";
+import { ExamConfig, ExamJob, defaultExamConfig, isJobExpired } from "@/types/exam";
 import { useAuth } from "@/contexts/AuthContext";
 import { API_BASE, getAccessToken } from "@/lib/api";
 import { downloadPdfWithAuth, isLineInAppBrowser } from "@/lib/download";
@@ -382,6 +383,15 @@ export function GeneratePanel({
     setSavedConfig({ ...config });
     await generateExam();
   };
+
+  // Show expired state for old jobs
+  if (selectedJob?.status === "done" && isJobExpired(selectedJob) && !isGenerating) {
+    return (
+      <div className="mx-auto w-full max-w-2xl px-4 py-8">
+        <ExpiredJobDisplay job={selectedJob} onNewExam={onClearSelection} />
+      </div>
+    );
+  }
 
   // Show result for completed job
   if (selectedJob?.status === "done" && !isGenerating) {

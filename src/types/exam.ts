@@ -11,7 +11,7 @@ export interface ExamConfig {
   specialRequests: string;
 }
 
-export type JobStatus = "queued" | "running" | "done" | "failed";
+export type JobStatus = "queued" | "running" | "done" | "failed" | "expired";
 
 export interface ExamJob {
   id: string;
@@ -25,6 +25,12 @@ export interface ExamJob {
   totalPages?: number;
   error?: string;
 }
+
+// Check if a job is expired (7 days since creation)
+export const isJobExpired = (job: ExamJob): boolean => {
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+  return Date.now() - job.createdAt.getTime() > SEVEN_DAYS_MS;
+};
 
 export const defaultExamConfig: ExamConfig = {
   mcqEnabled: true,
