@@ -47,18 +47,6 @@ export function GeneratePanel({
     { id: "generate", label: "Generating PDF" },
   ];
 
-  const handleTrySample = () => {
-    // Create a mock sample file for demo purposes
-    const sampleBlob = new Blob(["Sample PDF content"], {
-      type: "application/pdf",
-    });
-    const sampleFile = new File([sampleBlob], "sample-lecture.pdf", {
-      type: "application/pdf",
-    });
-    setFiles([sampleFile]);
-  };
-
-
   const pollJobStatus = useCallback(async (jobId: string, job: ExamJob): Promise<void> => {
     let notFoundRetries = 0;
     const MAX_NOT_FOUND_RETRIES = 5;
@@ -462,7 +450,6 @@ export function GeneratePanel({
         <FileUpload
           files={files}
           onFilesChange={setFiles}
-          onTrySample={handleTrySample}
           disabled={isGenerating}
         />
 
