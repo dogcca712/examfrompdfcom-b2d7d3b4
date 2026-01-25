@@ -194,15 +194,18 @@ export function ExamResult({
           </div>
         )}
         
-        <Button
-          onClick={onRegenerate}
-          size="lg"
-          variant="ghost"
-          className="w-full"
-        >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Generate another version
-        </Button>
+        {/* Only show regenerate button if not yet paid */}
+        {!isUnlocked && (
+          <Button
+            onClick={onRegenerate}
+            size="lg"
+            variant="ghost"
+            className="w-full"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Generate another version
+          </Button>
+        )}
       </div>
 
       {/* Payment Dialog */}
