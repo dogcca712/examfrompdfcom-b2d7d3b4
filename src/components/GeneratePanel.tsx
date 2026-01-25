@@ -190,9 +190,9 @@ export function GeneratePanel({
     try {
       // Step 1: Submit the job with auth
       const formData = new FormData();
-      // Append all files using array notation for FastAPI List[UploadFile]
+      // Append all files with same field name for FastAPI List[UploadFile]
       files.forEach((file) => {
-        formData.append("lecture_pdf[]", file);
+        formData.append("lecture_pdf", file);
       });
       
       // Append exam settings to the request (send 0 for disabled types)
