@@ -13,6 +13,8 @@ interface ExamResultProps {
   onUnlockPurchase: () => void;
   isUnlocked?: boolean;
   isPurchasing?: boolean;
+  isGeneratingAnswerKey?: boolean;
+  answerKeyReady?: boolean;
 }
 
 export function ExamResult({ 
@@ -23,6 +25,8 @@ export function ExamResult({
   onUnlockPurchase,
   isUnlocked = false,
   isPurchasing = false,
+  isGeneratingAnswerKey = false,
+  answerKeyReady = false,
 }: ExamResultProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
@@ -171,9 +175,24 @@ export function ExamResult({
               size="lg"
               variant="outline"
               className="flex-1"
+              disabled={isGeneratingAnswerKey || !answerKeyReady}
             >
-              <BookOpen className="mr-2 h-4 w-4" />
-              Download Answer Key
+              {isGeneratingAnswerKey ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Generating Answers...
+                </>
+              ) : !answerKeyReady ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Preparing...
+                </>
+              ) : (
+                <>
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Download Answer Key
+                </>
+              )}
             </Button>
           </div>
         ) : (
