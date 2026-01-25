@@ -29,7 +29,7 @@ export function GeneratePanel({
   onJobUpdate,
 }: GeneratePanelProps) {
   const { usage, refreshUsage, isAuthenticated } = useAuth();
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [config, setConfig] = useState<ExamConfig>(defaultExamConfig);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -53,7 +53,7 @@ export function GeneratePanel({
     const sampleFile = new File([sampleBlob], "sample-lecture.pdf", {
       type: "application/pdf",
     });
-    setFile(sampleFile);
+    setFiles([sampleFile]);
   };
 
 
@@ -148,7 +148,7 @@ export function GeneratePanel({
   };
 
   const generateExam = useCallback(async () => {
-    if (!file) return;
+    if (files.length === 0) return;
 
     // Check usage limits (only for authenticated users with usage data)
     if (isAuthenticated && usage && !usage.can_generate) {
@@ -159,32 +159,38 @@ export function GeneratePanel({
       return;
     }
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      setError({
-        message: "File too large",
-        details: `Maximum file size is 20MB. Your file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`,
-      });
-      return;
-    }
+    // Validate all files
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        setError({
+          message: "File too large",
+          details: `"${file.name}" exceeds 20MB limit (${(file.size / (1024 * 1024)).toFixed(2)}MB).`,
+        });
+        return;
+      }
 
-    // Validate file type
-    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-      setError({
-        message: "Invalid file type",
-        details: "Please upload a PDF file.",
-      });
-      return;
+      if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+        setError({
+          message: "Invalid file type",
+          details: `"${file.name}" is not a PDF file.`,
+        });
+        return;
+      }
     }
 
     setIsGenerating(true);
     setError(null);
     setCurrentStep(0);
 
+    // Use first file name for job display, indicate multiple files
+    const displayName = files.length > 1 
+      ? `${files[0].name} (+${files.length - 1} more)`
+      : files[0].name;
+
     const newJob: ExamJob = {
       id: crypto.randomUUID(),
       jobId: "",
-      fileName: file.name,
+      fileName: displayName,
       status: "running",
       createdAt: new Date(),
     };
@@ -193,7 +199,10 @@ export function GeneratePanel({
     try {
       // Step 1: Submit the job with auth
       const formData = new FormData();
-      formData.append("lecture_pdf", file);
+      // Append all files
+      files.forEach((file) => {
+        formData.append("lecture_pdf", file);
+      });
       
       // Append exam settings to the request (send 0 for disabled types)
       formData.append("mcq_count", config.mcqEnabled ? config.mcqCount.toString() : "0");
@@ -264,20 +273,24 @@ export function GeneratePanel({
       await pollJobStatus(jobId, updatedJob);
 
       // Step 3: Trigger download
-      const baseFileName = file.name.replace(/\.pdf$/i, "");
-      const examFileName = `${baseFileName}_exam.pdf`;
+      const baseFileName = files[0].name.replace(/\.pdf$/i, "");
+      const examFileName = files.length > 1 
+        ? `combined_exam.pdf` 
+        : `${baseFileName}_exam.pdf`;
       triggerDownload(jobId, examFileName);
 
       // Update job as completed
       const completedJob: ExamJob = {
         ...updatedJob,
         status: "done",
-        examTitle: `Practice Exam: ${baseFileName}`,
+        examTitle: files.length > 1 
+          ? `Practice Exam: ${files.length} PDFs Combined`
+          : `Practice Exam: ${baseFileName}`,
         courseCode: "Generated",
         downloadUrl: `${API_BASE}/download/${jobId}?t=${Date.now()}`,
       };
       onJobUpdate(completedJob);
-      setFile(null);
+      setFiles([]);
       // Refresh usage after successful generation
       await refreshUsage();
     } catch (err) {
@@ -316,10 +329,10 @@ export function GeneratePanel({
     } finally {
       setIsGenerating(false);
     }
-  }, [file, config, usage, isAuthenticated, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage]);
+  }, [files, config, usage, isAuthenticated, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage]);
 
   const handleGenerate = async () => {
-    if (!file) return;
+    if (files.length === 0) return;
     await generateExam();
   };
 
@@ -362,7 +375,7 @@ export function GeneratePanel({
       // Note: For regeneration, user needs to re-upload the file
       // since we don't store the original file
       setError(null);
-      setFile(null);
+      setFiles([]);
     }
   };
 
@@ -381,7 +394,7 @@ export function GeneratePanel({
 
   const handleBackToHome = () => {
     setError(null);
-    setFile(null);
+    setFiles([]);
   };
 
   // Show error state
@@ -431,13 +444,13 @@ export function GeneratePanel({
         <UsageBanner />
         
         <FileUpload
-          file={file}
-          onFileSelect={setFile}
+          files={files}
+          onFilesChange={setFiles}
           onTrySample={handleTrySample}
           disabled={isGenerating}
         />
 
-        {file && (
+        {files.length > 0 && (
           <>
             {/* Only show settings for authenticated users (Pro feature) */}
             {isAuthenticated && (
