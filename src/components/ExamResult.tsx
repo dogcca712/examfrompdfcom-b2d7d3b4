@@ -177,7 +177,7 @@ export function ExamResult({
             </Button>
           </div>
         ) : (
-          // Locked state - vibrant payment prompt
+          // Locked state - vibrant payment prompt with discount
           <div className="space-y-3">
             <Button
               onClick={handleLockedButtonClick}
@@ -185,11 +185,11 @@ export function ExamResult({
               className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:from-orange-600 hover:via-red-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/40 hover:shadow-orange-500/60 transition-all duration-300 hover:scale-[1.02] animate-pulse hover:animate-none"
             >
               <Lock className="mr-2 h-5 w-5" />
-              🔥 Unlock for $0.99 — Get Exam + Answers!
+              🔥 <span className="line-through opacity-70 mx-1">$2</span> $0.99 — Unlock Exam + Answers!
               <Sparkles className="ml-2 h-5 w-5" />
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              💡 One-time payment • Instant download • Includes answer key
+              🏷️ <span className="text-red-500 font-semibold">50% OFF</span> • Limited time • Includes answer key
             </p>
           </div>
         )}
