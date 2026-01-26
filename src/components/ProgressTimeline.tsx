@@ -25,18 +25,18 @@ export function ProgressTimeline({
   failed,
 }: ProgressTimelineProps) {
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-      <div className="space-y-4">
+    <div className="rounded-2xl border border-border bg-card p-8 sm:p-10 shadow-lg">
+      <div className="space-y-6">
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
           const isFailed = failed && isCurrent;
 
           return (
-            <div key={step.id} className="flex items-center gap-4">
+            <div key={step.id} className="flex items-center gap-5">
               <div
                 className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300",
+                  "flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300",
                   isCompleted
                     ? "border-success bg-success"
                     : isFailed
@@ -47,11 +47,11 @@ export function ProgressTimeline({
                 )}
               >
                 {isCompleted ? (
-                  <Check className="h-4 w-4 text-success-foreground" />
+                  <Check className="h-5 w-5 sm:h-6 sm:w-6 text-success-foreground" />
                 ) : isCurrent ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-primary-foreground" />
+                  <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-primary-foreground" />
                 ) : (
-                  <span className="text-xs font-medium text-muted-foreground">
+                  <span className="text-sm sm:text-base font-medium text-muted-foreground">
                     {index + 1}
                   </span>
                 )}
@@ -59,7 +59,7 @@ export function ProgressTimeline({
               <div className="flex-1">
                 <p
                   className={cn(
-                    "text-sm font-medium transition-colors",
+                    "text-base sm:text-lg font-medium transition-colors",
                     isCompleted
                       ? "text-success"
                       : isFailed
