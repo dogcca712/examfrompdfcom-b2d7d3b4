@@ -81,6 +81,17 @@ const Index = () => {
     [selectedJobId]
   );
 
+  // Select job by jobId (backend ID, not frontend UUID)
+  const handleSelectJobById = useCallback(
+    (jobId: string) => {
+      const job = jobs.find((j) => j.jobId === jobId);
+      if (job) {
+        setSelectedJobId(job.id);
+      }
+    },
+    [jobs]
+  );
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Top Navigation Header */}
@@ -107,6 +118,7 @@ const Index = () => {
               onJobCreate={handleJobCreate}
               onJobUpdate={handleJobUpdate}
               onClearSelection={handleNewExam}
+              onSelectJobById={handleSelectJobById}
             />
           </section>
 
