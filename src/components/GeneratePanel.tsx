@@ -156,7 +156,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
   // Upload a single file to backend
   const uploadSingleFile = useCallback(async (file: File, sessionId: string, token: string | null): Promise<void> => {
     const formData = new FormData();
-    formData.append("lecture_pdf", file);
+    formData.append("file", file);  // 字段名必须是 'file'
     formData.append("session_id", sessionId);
 
     const headers: HeadersInit = {};
