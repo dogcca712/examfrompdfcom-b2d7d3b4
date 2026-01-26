@@ -122,7 +122,7 @@ export function ExamResult({
         </div>
         
         {/* PDF Preview Area */}
-        <div className="h-[400px] sm:h-[500px] w-full bg-muted/20">
+        <div className="h-[200px] sm:h-[500px] w-full bg-muted/20">
           {isLoadingPdf ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
@@ -212,13 +212,15 @@ export function ExamResult({
             <Button
               onClick={handleLockedButtonClick}
               size="lg"
-              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:from-orange-600 hover:via-red-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/40 hover:shadow-orange-500/60 transition-all duration-300 hover:scale-[1.02]"
+              className="w-full h-14 text-base sm:text-lg font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:from-orange-600 hover:via-red-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/40 hover:shadow-orange-500/60 transition-all duration-300 hover:scale-[1.02] px-3 sm:px-6"
             >
-              <Lock className="mr-2 h-5 w-5" />
-              🔥 <span className="line-through opacity-70 mx-1">$2.00</span> $0.99 — Unlock Exam + Answers!
-              <Sparkles className="ml-2 h-5 w-5" />
+              <Lock className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+              <span className="truncate">
+                🔥 <span className="line-through opacity-70 mx-0.5 sm:mx-1">$2</span> $0.99 — Unlock!
+              </span>
+              <Sparkles className="ml-1 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-xs sm:text-sm text-muted-foreground">
               🏷️ <span className="text-red-500 font-semibold">50% OFF</span> • Limited time • Includes answer key
             </p>
           </div>
