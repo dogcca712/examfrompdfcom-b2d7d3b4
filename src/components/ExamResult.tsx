@@ -1,4 +1,4 @@
-import { FileText, Lock, RefreshCw, Calendar, File, Sparkles, Download, BookOpen, Smartphone, CheckCircle } from "lucide-react";
+import { FileText, Lock, RefreshCw, Calendar, Sparkles, Download, BookOpen, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExamJob } from "@/types/exam";
 import { API_BASE, getAccessToken } from "@/lib/api";
@@ -28,8 +28,9 @@ export function ExamResult({
   isGeneratingAnswerKey = false,
   answerKeyReady = false,
 }: ExamResultProps) {
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [isLoadingPdf, setIsLoadingPdf] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   const formatDate = (date: Date) => {
@@ -42,12 +43,13 @@ export function ExamResult({
     });
   };
 
-  // Fetch PDF for preview with auth
+  // Fetch preview image with auth
   useEffect(() => {
-    const fetchPdfForPreview = async () => {
+    const fetchPreview = async () => {
       if (!job.jobId) return;
       
-      setIsLoadingPdf(true);
+      setIsLoadingPreview(true);
+      setPreviewError(false);
       try {
         const token = getAccessToken();
         const headers: HeadersInit = {};
@@ -55,28 +57,33 @@ export function ExamResult({
           headers["Authorization"] = `Bearer ${token}`;
         }
         
-        const response = await fetch(`${API_BASE}/download/${job.jobId}?t=${Date.now()}`, {
+        // Try to fetch preview image
+        const response = await fetch(`${API_BASE}/preview/${job.jobId}?t=${Date.now()}`, {
           headers,
         });
         
         if (response.ok) {
           const blob = await response.blob();
           const url = URL.createObjectURL(blob);
-          setPdfUrl(url);
+          setPreviewUrl(url);
+        } else {
+          // Preview not available, show fallback
+          setPreviewError(true);
         }
       } catch (error) {
-        console.error("Failed to load PDF preview:", error);
+        console.error("Failed to load preview:", error);
+        setPreviewError(true);
       } finally {
-        setIsLoadingPdf(false);
+        setIsLoadingPreview(false);
       }
     };
 
-    fetchPdfForPreview();
+    fetchPreview();
 
     // Cleanup blob URL on unmount
     return () => {
-      if (pdfUrl) {
-        URL.revokeObjectURL(pdfUrl);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
       }
     };
   }, [job.jobId]);
@@ -121,46 +128,38 @@ export function ExamResult({
           </div>
         </div>
         
-        {/* PDF Preview Area */}
-        <div className="h-[200px] sm:h-[500px] w-full bg-muted/20">
-          {isLoadingPdf ? (
-            <div className="flex h-full items-center justify-center">
+        {/* Preview Image Area */}
+        <div className="w-full bg-muted/20 flex items-center justify-center overflow-hidden">
+          {isLoadingPreview ? (
+            <div className="flex h-[200px] sm:h-[400px] items-center justify-center">
               <div className="text-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto" />
                 <p className="mt-2 text-sm text-muted-foreground">Loading preview...</p>
               </div>
             </div>
-          ) : pdfUrl ? (
-            <object
-              data={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1`}
-              type="application/pdf"
-              className="w-full h-full"
-            >
-              {/* Fallback for browsers that don't support PDF preview */}
-              <div className="flex h-full items-center justify-center p-6">
-                <div className="text-center space-y-4">
-                  <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-success/10">
-                    <CheckCircle className="h-8 w-8 text-success" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground text-lg">Exam Generated!</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Your practice exam is ready
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-4 py-2">
-                    <Smartphone className="h-4 w-4" />
-                    <span>PDF preview not supported in this browser</span>
-                  </div>
-                </div>
-              </div>
-            </object>
+          ) : previewUrl ? (
+            <img
+              src={previewUrl}
+              alt="Exam preview - first page"
+              className="w-full h-auto max-h-[300px] sm:max-h-[500px] object-contain"
+            />
           ) : (
-            <div className="flex h-full items-center justify-center p-8">
-              <div className="text-center text-muted-foreground">
-                <File className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>Preview not available</p>
-                <p className="text-sm">Click download to get your exam</p>
+            <div className="flex h-[200px] sm:h-[300px] items-center justify-center p-6">
+              <div className="text-center space-y-4">
+                <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-success/10">
+                  <CheckCircle className="h-8 w-8 text-success" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground text-lg">Exam Generated!</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Your practice exam is ready
+                  </p>
+                </div>
+                {previewError && (
+                  <p className="text-xs text-muted-foreground">
+                    Preview image not available
+                  </p>
+                )}
               </div>
             </div>
           )}
