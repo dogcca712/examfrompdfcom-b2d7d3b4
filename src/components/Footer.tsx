@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react";
+import { FileText, ArrowRight } from "lucide-react";
 
 export function Footer() {
   return (
@@ -7,10 +7,13 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <FileText className="h-4 w-4 text-primary-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70">
+              <div className="relative flex items-center">
+                <FileText className="h-3.5 w-3.5 text-primary-foreground" />
+                <ArrowRight className="h-2.5 w-2.5 text-primary-foreground -ml-0.5" />
+              </div>
             </div>
-            <span className="text-lg font-semibold">ExamGen</span>
+            <span className="text-lg font-semibold">ExamFromPDF</span>
           </div>
 
           {/* Links */}

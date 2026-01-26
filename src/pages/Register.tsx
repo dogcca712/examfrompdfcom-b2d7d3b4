@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Loader2, FileText } from "lucide-react";
+import { Loader2, FileText, ArrowRight } from "lucide-react";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -46,8 +46,13 @@ export default function Register() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="flex items-center justify-between p-4">
         <Link to="/" className="flex items-center gap-2 text-foreground">
-          <FileText className="h-6 w-6 text-primary" />
-          <span className="text-lg font-semibold">ExamGen</span>
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70">
+            <div className="relative flex items-center">
+              <FileText className="h-3 w-3 text-primary-foreground" />
+              <ArrowRight className="h-2 w-2 text-primary-foreground -ml-0.5" />
+            </div>
+          </div>
+          <span className="text-lg font-semibold">ExamFromPDF</span>
         </Link>
         <ThemeToggle />
       </header>
