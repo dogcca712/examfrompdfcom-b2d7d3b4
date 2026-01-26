@@ -95,19 +95,19 @@ export function FileUpload({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-medium text-foreground">
+                <span className="font-medium text-foreground text-sm sm:text-base">
                   {files.length} PDF{files.length > 1 ? "s" : ""} selected
                 </span>
                 <Badge variant="secondary" className="text-xs">
                   {files.length}/{MAX_FILES}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground break-words">
                 {(totalSize / 1024 / 1024).toFixed(2)} MB total • ~{totalPages} pages
               </p>
             </div>
           </div>
-          {canAddMore && (
+          {canAddMore && !disabled && (
             <label className="cursor-pointer">
               <input
                 type="file"
@@ -119,12 +119,11 @@ export function FileUpload({
               />
               <Button
                 variant="outline"
-                size="sm"
+                size="icon"
                 className="pointer-events-none"
                 disabled={disabled}
               >
-                <Plus className="mr-1 h-4 w-4" />
-                Add more
+                <Plus className="h-4 w-4" />
               </Button>
             </label>
           )}
@@ -141,10 +140,10 @@ export function FileUpload({
                 <FileText className="h-4 w-4 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">
+                <p className="break-all text-sm font-medium text-foreground line-clamp-1">
                   {file.name}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground whitespace-nowrap">
                   {(file.size / 1024 / 1024).toFixed(2)} MB • ~{estimatePages(file.size)} pages
                 </p>
               </div>
@@ -184,7 +183,7 @@ export function FileUpload({
               disabled={disabled}
             />
             <Plus className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs sm:text-sm text-muted-foreground break-words text-center">
               Drop more PDFs here or click to add ({MAX_FILES - files.length} remaining)
             </span>
           </div>
