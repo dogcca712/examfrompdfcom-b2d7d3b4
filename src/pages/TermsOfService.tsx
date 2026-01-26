@@ -6,7 +6,7 @@ export default function TermsOfService() {
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
       
-      <main className="flex-1 py-16">
+      <main className="flex-1 pt-28 pb-16">
         <div className="mx-auto max-w-3xl px-4">
           <h1 className="mb-8 text-4xl font-bold tracking-tight">Terms of Service</h1>
           <p className="mb-8 text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
