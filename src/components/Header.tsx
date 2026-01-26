@@ -10,9 +10,10 @@ const navItems = [
 
 interface HeaderProps {
   onMenuClick?: () => void;
+  hideNavigation?: boolean;
 }
 
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header({ onMenuClick, hideNavigation = false }: HeaderProps) {
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
@@ -25,15 +26,17 @@ export function Header({ onMenuClick }: HeaderProps) {
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left: Menu button (mobile only) + Logo */}
         <div className="flex items-center gap-3">
-          {/* Menu button - only visible on mobile/tablet, hidden on desktop */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 lg:hidden"
-            onClick={onMenuClick}
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
+          {/* Menu button - only visible on mobile/tablet when navigation is shown */}
+          {!hideNavigation && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 lg:hidden"
+              onClick={onMenuClick}
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          )}
           
           <a href="/" className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-sm">
@@ -47,32 +50,34 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
 
         {/* Right: Navigation links (desktop) or Menu button placeholder (mobile) */}
-        <div className="flex items-center">
-          {/* Desktop navigation */}
-          <nav className="hidden items-center gap-10 lg:flex">
-            {navItems.map((item) => (
-              <button
-                key={item.href}
-                onClick={() => scrollToSection(item.href)}
-                className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground"
+        {!hideNavigation && (
+          <div className="flex items-center">
+            {/* Desktop navigation */}
+            <nav className="hidden items-center gap-10 lg:flex">
+              {navItems.map((item) => (
+                <button
+                  key={item.href}
+                  onClick={() => scrollToSection(item.href)}
+                  className="text-base font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {item.label}
+                </button>
+              ))}
+              {/* Menu button on desktop - for sidebar access */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 ml-2"
+                onClick={onMenuClick}
               >
-                {item.label}
-              </button>
-            ))}
-            {/* Menu button on desktop - for sidebar access */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 ml-2"
-              onClick={onMenuClick}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </nav>
-          
-          {/* Mobile: empty space to balance layout */}
-          <div className="w-11 lg:hidden" />
-        </div>
+                <Menu className="h-5 w-5" />
+              </Button>
+            </nav>
+            
+            {/* Mobile: empty space to balance layout */}
+            <div className="w-11 lg:hidden" />
+          </div>
+        )}
       </div>
     </header>
   );
