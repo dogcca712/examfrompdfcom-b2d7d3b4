@@ -135,11 +135,11 @@ export default function UseCaseLecturePDFs() {
             </h2>
             <div className="grid gap-8 md:grid-cols-3">
               {steps.map((step, index) => (
-                <div key={step.title} className="relative text-center">
+                <div key={step.title} className="relative text-center pt-6">
                   <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                     <step.icon className="h-6 w-6" />
                   </div>
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-xs font-medium text-muted-foreground">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 text-xs font-medium text-muted-foreground">
                     Step {index + 1}
                   </div>
                   <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
