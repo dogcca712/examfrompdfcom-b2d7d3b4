@@ -7,9 +7,45 @@ import { Pricing } from "@/components/Pricing";
 import { FAQ } from "@/components/FAQ";
 import { Footer } from "@/components/Footer";
 import { GeneratePanel } from "@/components/GeneratePanel";
-import { ExamJob } from "@/types/exam";
+import { ExamJob, isJobExpired } from "@/types/exam";
 import { jobsApi, API_BASE } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+
+const GUEST_JOBS_KEY = "guest_jobs";
+
+// Helper to load guest jobs from localStorage (with 7-day expiration cleanup)
+function loadGuestJobs(): ExamJob[] {
+  try {
+    const stored = localStorage.getItem(GUEST_JOBS_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+    
+    // Convert and filter expired jobs
+    const jobs: ExamJob[] = parsed
+      .map((j: any) => ({
+        ...j,
+        createdAt: new Date(j.createdAt),
+      }))
+      .filter((job: ExamJob) => !isJobExpired(job));
+    
+    return jobs;
+  } catch (e) {
+    console.error("Failed to load guest jobs:", e);
+    return [];
+  }
+}
+
+// Helper to save guest jobs to localStorage
+function saveGuestJobs(jobs: ExamJob[]) {
+  try {
+    // Only keep non-expired jobs
+    const validJobs = jobs.filter((job) => !isJobExpired(job));
+    localStorage.setItem(GUEST_JOBS_KEY, JSON.stringify(validJobs));
+  } catch (e) {
+    console.error("Failed to save guest jobs:", e);
+  }
+}
 
 const Index = () => {
   const { isAuthenticated } = useAuth();
@@ -43,10 +79,20 @@ const Index = () => {
 
   // Fetch jobs on mount and when auth state changes
   useEffect(() => {
-    // Clear jobs when user logs out
+    // For anonymous users: load from localStorage
     if (!isAuthenticated) {
-      setJobs([]);
-      setSelectedJobId(null);
+      const guestJobs = loadGuestJobs();
+      setJobs(guestJobs);
+      
+      // Handle pending job selection for anonymous users too
+      if (pendingSelectJobId) {
+        const pendingJob = guestJobs.find((j) => j.jobId === pendingSelectJobId);
+        if (pendingJob) {
+          setSelectedJobId(pendingJob.id);
+        }
+        setPendingSelectJobId(null);
+      }
+      
       setIsLoadingJobs(false);
       return;
     }
@@ -89,15 +135,27 @@ const Index = () => {
   const selectedJob = jobs.find((job) => job.id === selectedJobId) || null;
 
   const handleJobCreate = useCallback((job: ExamJob) => {
-    setJobs((prev) => [job, ...prev]);
+    setJobs((prev) => {
+      const newJobs = [job, ...prev];
+      // Save to localStorage for anonymous users
+      if (!isAuthenticated) {
+        saveGuestJobs(newJobs);
+      }
+      return newJobs;
+    });
     setSelectedJobId(job.id);
-  }, []);
+  }, [isAuthenticated]);
 
   const handleJobUpdate = useCallback((updatedJob: ExamJob) => {
-    setJobs((prev) =>
-      prev.map((job) => (job.id === updatedJob.id ? updatedJob : job))
-    );
-  }, []);
+    setJobs((prev) => {
+      const newJobs = prev.map((job) => (job.id === updatedJob.id ? updatedJob : job));
+      // Save to localStorage for anonymous users
+      if (!isAuthenticated) {
+        saveGuestJobs(newJobs);
+      }
+      return newJobs;
+    });
+  }, [isAuthenticated]);
 
   const handleNewExam = useCallback(() => {
     setSelectedJobId(null);
@@ -105,12 +163,19 @@ const Index = () => {
 
   const handleDeleteJob = useCallback(
     (id: string) => {
-      setJobs((prev) => prev.filter((job) => job.id !== id));
+      setJobs((prev) => {
+        const newJobs = prev.filter((job) => job.id !== id);
+        // Save to localStorage for anonymous users
+        if (!isAuthenticated) {
+          saveGuestJobs(newJobs);
+        }
+        return newJobs;
+      });
       if (selectedJobId === id) {
         setSelectedJobId(null);
       }
     },
-    [selectedJobId]
+    [selectedJobId, isAuthenticated]
   );
 
   // Select job by jobId (backend ID, not frontend UUID)
