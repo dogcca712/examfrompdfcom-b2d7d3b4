@@ -23,25 +23,18 @@ interface GeneratePanelProps {
   onClearSelection: () => void;
 }
 
-export function GeneratePanel({
-  selectedJob,
-  onJobCreate,
-  onJobUpdate,
-  onClearSelection,
-}: GeneratePanelProps) {
+export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSelection }: GeneratePanelProps) {
   const { refreshUsage, isAuthenticated } = useAuth();
   const [files, setFiles] = useState<File[]>([]);
   const [config, setConfig] = useState<ExamConfig>(defaultExamConfig);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [error, setError] = useState<{ message: string; details?: string } | null>(
-    null
-  );
-  
+  const [error, setError] = useState<{ message: string; details?: string } | null>(null);
+
   // Payment state for per-download purchases
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [unlockedJobs, setUnlockedJobs] = useState<Set<string>>(new Set());
-  
+
   // Answer key generation state (deferred until after payment)
   const [isGeneratingAnswerKey, setIsGeneratingAnswerKey] = useState(false);
   const [answerKeyReady, setAnswerKeyReady] = useState(false);
@@ -53,71 +46,74 @@ export function GeneratePanel({
     { id: "generate", label: "Generating PDF" },
   ];
 
-  const pollJobStatus = useCallback(async (jobId: string, job: ExamJob): Promise<void> => {
-    let notFoundRetries = 0;
-    const MAX_NOT_FOUND_RETRIES = 5;
-    
-    const pollOnce = async (): Promise<{ status: string; error?: string }> => {
-      const headers: HeadersInit = {};
-      const token = getAccessToken();
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      
-      const response = await fetch(`${API_BASE}/status/${jobId}`, { headers });
-      
-      // Handle 404 - job might still be registering
-      if (response.status === 404) {
-        notFoundRetries++;
-        if (notFoundRetries <= MAX_NOT_FOUND_RETRIES) {
-          console.log(`Job not found yet, retry ${notFoundRetries}/${MAX_NOT_FOUND_RETRIES}`);
-          return { status: "pending" };
+  const pollJobStatus = useCallback(
+    async (jobId: string, job: ExamJob): Promise<void> => {
+      let notFoundRetries = 0;
+      const MAX_NOT_FOUND_RETRIES = 5;
+
+      const pollOnce = async (): Promise<{ status: string; error?: string }> => {
+        const headers: HeadersInit = {};
+        const token = getAccessToken();
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
         }
-        throw new Error("Job not found after multiple retries");
-      }
-      
-      if (!response.ok) {
-        throw new Error(`Failed to check status (${response.status})`);
-      }
-      
-      notFoundRetries = 0; // Reset on success
-      return response.json();
-    };
 
-    // Initial delay to give backend time to register the job
-    await new Promise(resolve => setTimeout(resolve, 500));
+        const response = await fetch(`${API_BASE}/status/${jobId}`, { headers });
 
-    return new Promise((resolve, reject) => {
-      let stepIndex = 0;
-      
-      const poll = async () => {
-        try {
-          const result = await pollOnce();
-          
-          if (result.status === "pending" || result.status === "queued" || result.status === "running") {
-            // Update progress step
-            if (stepIndex < steps.length - 1) {
-              stepIndex++;
-              setCurrentStep(stepIndex);
-            }
-            setTimeout(poll, POLL_INTERVAL);
-          } else if (result.status === "done") {
-            setCurrentStep(steps.length - 1);
-            resolve();
-          } else if (result.status === "failed") {
-            reject(new Error(result.error || "Job failed"));
-          } else {
-            // Unknown status, keep polling
-            setTimeout(poll, POLL_INTERVAL);
+        // Handle 404 - job might still be registering
+        if (response.status === 404) {
+          notFoundRetries++;
+          if (notFoundRetries <= MAX_NOT_FOUND_RETRIES) {
+            console.log(`Job not found yet, retry ${notFoundRetries}/${MAX_NOT_FOUND_RETRIES}`);
+            return { status: "pending" };
           }
-        } catch (err) {
-          reject(err);
+          throw new Error("Job not found after multiple retries");
         }
+
+        if (!response.ok) {
+          throw new Error(`Failed to check status (${response.status})`);
+        }
+
+        notFoundRetries = 0; // Reset on success
+        return response.json();
       };
 
-      poll();
-    });
-  }, [steps.length]);
+      // Initial delay to give backend time to register the job
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      return new Promise((resolve, reject) => {
+        let stepIndex = 0;
+
+        const poll = async () => {
+          try {
+            const result = await pollOnce();
+
+            if (result.status === "pending" || result.status === "queued" || result.status === "running") {
+              // Update progress step
+              if (stepIndex < steps.length - 1) {
+                stepIndex++;
+                setCurrentStep(stepIndex);
+              }
+              setTimeout(poll, POLL_INTERVAL);
+            } else if (result.status === "done") {
+              setCurrentStep(steps.length - 1);
+              resolve();
+            } else if (result.status === "failed") {
+              reject(new Error(result.error || "Job failed"));
+            } else {
+              // Unknown status, keep polling
+              setTimeout(poll, POLL_INTERVAL);
+            }
+          } catch (err) {
+            reject(err);
+          }
+        };
+
+        poll();
+      });
+    },
+    [steps.length],
+  );
 
   const generateExam = useCallback(async () => {
     if (files.length === 0) return;
@@ -148,9 +144,7 @@ export function GeneratePanel({
     setCurrentStep(0);
 
     // Use first file name for job display, indicate multiple files
-    const displayName = files.length > 1 
-      ? `${files[0].name} (+${files.length - 1} more)`
-      : files[0].name;
+    const displayName = files.length > 1 ? `${files[0].name} (+${files.length - 1} more)` : files[0].name;
 
     const newJob: ExamJob = {
       id: crypto.randomUUID(),
@@ -168,7 +162,7 @@ export function GeneratePanel({
       files.forEach((file) => {
         formData.append("lecture_pdf", file);
       });
-      
+
       // Append exam settings to the request (send 0 for disabled types)
       formData.append("mcq_count", config.mcqEnabled ? config.mcqCount.toString() : "0");
       formData.append("short_answer_count", config.shortAnswerEnabled ? config.shortAnswerCount.toString() : "0");
@@ -180,7 +174,7 @@ export function GeneratePanel({
 
       // Get token if available (optional for guest users)
       const token = getAccessToken();
-      
+
       const headers: HeadersInit = {};
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
@@ -198,10 +192,10 @@ export function GeneratePanel({
         if (fetchError instanceof TypeError && fetchError.message.includes("fetch")) {
           throw new Error(
             `Network error: Unable to connect to ${API_BASE}. ` +
-            `Please check:\n` +
-            `1. Backend service is running\n` +
-            `2. CORS is configured correctly\n` +
-            `3. Network connection is stable`
+              `Please check:\n` +
+              `1. Backend service is running\n` +
+              `2. CORS is configured correctly\n` +
+              `3. Network connection is stable`,
           );
         }
         throw fetchError;
@@ -209,7 +203,7 @@ export function GeneratePanel({
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => "Unknown error");
-        
+
         // Provide more specific error messages
         if (response.status === 401 && isAuthenticated) {
           throw new Error("Authentication failed. Please log in again.");
@@ -243,9 +237,10 @@ export function GeneratePanel({
       const completedJob: ExamJob = {
         ...updatedJob,
         status: "done",
-        examTitle: files.length > 1 
-          ? `Practice Exam: ${files.length} PDFs Combined`
-          : `Practice Exam: ${files[0].name.replace(/\.pdf$/i, "")}`,
+        examTitle:
+          files.length > 1
+            ? `Practice Exam: ${files.length} PDFs Combined`
+            : `Practice Exam: ${files[0].name.replace(/\.pdf$/i, "")}`,
         courseCode: "Generated",
         downloadUrl: `${API_BASE}/download/${jobId}?t=${Date.now()}`,
       };
@@ -256,7 +251,7 @@ export function GeneratePanel({
     } catch (err) {
       let errorMessage = "Unknown error occurred";
       let errorDetails = "";
-      
+
       if (err instanceof Error) {
         errorMessage = err.message;
         // If error message contains newlines, split into message and details
@@ -271,9 +266,9 @@ export function GeneratePanel({
         errorMessage = err;
         errorDetails = err;
       }
-      
+
       console.error("Generate exam error:", err);
-      
+
       setError({
         message: "Failed to generate exam",
         details: errorDetails || errorMessage,
@@ -300,13 +295,12 @@ export function GeneratePanel({
     if (selectedJob?.jobId) {
       // Check if running in Line's in-app browser
       if (isLineInAppBrowser()) {
-        toast.error(
-          "Line 内置浏览器不支持下载文件。请点击右上角菜单，选择「在浏览器中打开」后重试。",
-          { duration: 8000 }
-        );
+        toast.error("Line 内置浏览器不支持下载文件。请点击右上角菜单，选择「在浏览器中打开」后重试。", {
+          duration: 8000,
+        });
         return;
       }
-      
+
       const examFileName = `${selectedJob.fileName.replace(/\.pdf$/i, "")}_exam.pdf`;
       try {
         await downloadPdfWithAuth(`/download/${selectedJob.jobId}`, examFileName);
@@ -323,11 +317,11 @@ export function GeneratePanel({
       if (isLineInAppBrowser()) {
         toast.error(
           "Line browser does not support downloads. Please tap ⋮ in the top right and select 'Open in Browser'",
-          { duration: 8000 }
+          { duration: 8000 },
         );
         return;
       }
-      
+
       const answerFileName = `${selectedJob.fileName.replace(/\.pdf$/i, "")}_answer_key.pdf`;
       try {
         await downloadPdfWithAuth(`/download_answer/${selectedJob.jobId}`, answerFileName);
@@ -341,7 +335,7 @@ export function GeneratePanel({
   // Handle unlock purchase - triggers answer key generation after payment
   const handleUnlockPurchase = async () => {
     if (!selectedJob?.jobId) return;
-    
+
     setIsPurchasing(true);
     try {
       const token = getAccessToken();
@@ -351,33 +345,32 @@ export function GeneratePanel({
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      
+
       const response = await fetch(`${API_BASE}/payments/purchase-download`, {
         method: "POST",
         headers,
         body: JSON.stringify({ job_id: selectedJob.jobId }),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text().catch(() => "Payment failed");
         throw new Error(errorText);
       }
-      
+
       const data = await response.json();
-      
+
       // If backend returns a checkout URL, redirect to Stripe
       if (data.checkout_url) {
         window.location.href = data.checkout_url;
         return;
       }
-      
+
       // Payment successful - mark as unlocked and start answer key generation
-      setUnlockedJobs(prev => new Set(prev).add(selectedJob.jobId));
+      setUnlockedJobs((prev) => new Set(prev).add(selectedJob.jobId));
       toast.success("Payment successful! Generating answer key...");
-      
+
       // Start generating answer key
       await generateAnswerKey(selectedJob.jobId);
-      
     } catch (err) {
       const message = err instanceof Error ? err.message : "Payment failed";
       toast.error(message);
@@ -390,7 +383,7 @@ export function GeneratePanel({
   const generateAnswerKey = async (jobId: string) => {
     setIsGeneratingAnswerKey(true);
     setAnswerKeyReady(false);
-    
+
     try {
       const token = getAccessToken();
       const headers: HeadersInit = {
@@ -399,20 +392,20 @@ export function GeneratePanel({
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      
+
       // Tell backend to start generating answer key
       const response = await fetch(`${API_BASE}/generate_answer/${jobId}`, {
         method: "POST",
         headers,
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to start answer key generation");
       }
-      
+
       // Poll for answer key completion
       await pollAnswerKeyStatus(jobId);
-      
+
       setAnswerKeyReady(true);
       toast.success("Answer key is ready!");
     } catch (err) {
@@ -437,13 +430,13 @@ export function GeneratePanel({
       const poll = async () => {
         try {
           const response = await fetch(`${API_BASE}/answer_status/${jobId}`, { headers });
-          
+
           if (!response.ok) {
             throw new Error("Failed to check answer key status");
           }
-          
+
           const result = await response.json();
-          
+
           if (result.status === "done") {
             resolve();
           } else if (result.status === "failed") {
@@ -488,8 +481,9 @@ export function GeneratePanel({
 
   // Check if current job is unlocked
   // DEV MODE: Set VITE_MOCK_PAYMENT=true to bypass payment for testing
-  const isMockPaymentEnabled = import.meta.env.VITE_MOCK_PAYMENT === 'true';
-  const isCurrentJobUnlocked = isMockPaymentEnabled || (selectedJob?.jobId ? unlockedJobs.has(selectedJob.jobId) : false);
+  const isMockPaymentEnabled = import.meta.env.VITE_MOCK_PAYMENT === "true";
+  const isCurrentJobUnlocked =
+    isMockPaymentEnabled || (selectedJob?.jobId ? unlockedJobs.has(selectedJob.jobId) : false);
 
   // Show expired state for old jobs
   if (selectedJob?.status === "done" && isJobExpired(selectedJob) && !isGenerating) {
@@ -503,7 +497,7 @@ export function GeneratePanel({
   // Show result for completed job
   if (selectedJob?.status === "done" && !isGenerating) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-4 py-4">
+      <div className="mx-auto w-full max-w-2xl px-4 py-2">
         <ExamResult
           job={selectedJob}
           onDownload={handleDownload}
@@ -528,12 +522,7 @@ export function GeneratePanel({
   if (error && !isGenerating) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8">
-        <ErrorDisplay
-          message={error.message}
-          details={error.details}
-          onRetry={handleRetry}
-          onBack={handleBackToHome}
-        />
+        <ErrorDisplay message={error.message} details={error.details} onRetry={handleRetry} onBack={handleBackToHome} />
       </div>
     );
   }
@@ -543,12 +532,8 @@ export function GeneratePanel({
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:py-16">
         <div className="mb-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Generating your exam...
-          </h2>
-          <p className="mt-2 text-base text-muted-foreground">
-            This usually takes 30-60 seconds
-          </p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Generating your exam...</h2>
+          <p className="mt-2 text-base text-muted-foreground">This usually takes 30-60 seconds</p>
         </div>
         <ProgressTimeline steps={steps} currentStep={currentStep} />
       </div>
@@ -559,37 +544,21 @@ export function GeneratePanel({
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Generate Practice Exams
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Generate Practice Exams</h1>
         <p className="mt-3 text-lg text-muted-foreground">
           Upload your lecture PDF and get a professionally formatted exam in seconds.
         </p>
       </div>
 
       <div className="space-y-6">
-        <FileUpload
-          files={files}
-          onFilesChange={setFiles}
-          disabled={isGenerating}
-        />
+        <FileUpload files={files} onFilesChange={setFiles} disabled={isGenerating} />
 
         {files.length > 0 && (
           <>
             {/* Show settings for all users */}
-            <ExamSettings
-              config={config}
-              onChange={setConfig}
-              disabled={isGenerating}
-            />
+            <ExamSettings config={config} onChange={setConfig} disabled={isGenerating} />
 
-            <Button
-              onClick={handleGenerate}
-              size="xl"
-              variant="gradient"
-              className="w-full"
-              disabled={isGenerating}
-            >
+            <Button onClick={handleGenerate} size="xl" variant="gradient" className="w-full" disabled={isGenerating}>
               <Sparkles className="mr-2 h-5 w-5" />
               Generate Exam
             </Button>
