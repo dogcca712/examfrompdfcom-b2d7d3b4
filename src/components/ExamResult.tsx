@@ -1,9 +1,10 @@
-import { FileText, Lock, RefreshCw, Calendar, Sparkles, Download, BookOpen, CheckCircle } from "lucide-react";
+import { FileText, Lock, RefreshCw, Calendar, Sparkles, Download, BookOpen, CheckCircle, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExamJob } from "@/types/exam";
 import { API_BASE, getAccessToken } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { UnlockPaymentDialog } from "./UnlockPaymentDialog";
+import { toast } from "@/hooks/use-toast";
 
 interface ExamResultProps {
   job: ExamJob;
@@ -170,40 +171,44 @@ export function ExamResult({
       <div className="flex flex-col gap-3">
         {isUnlocked ? (
           // Unlocked state - show download buttons
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button
-              onClick={onDownload}
-              size="lg"
-              variant="gradient"
-              className="flex-1"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Download PDF
-            </Button>
-            <Button
-              onClick={onDownloadAnswerKey}
-              size="lg"
-              variant="outline"
-              className="flex-1"
-              disabled={isGeneratingAnswerKey || !answerKeyReady}
-            >
-              {isGeneratingAnswerKey ? (
-                <>
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Generating Answers...
-                </>
-              ) : !answerKeyReady ? (
-                <>
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Preparing...
-                </>
-              ) : (
-                <>
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  Download Answer Key
-                </>
-              )}
-            </Button>
+          <div className="space-y-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                onClick={onDownload}
+                size="lg"
+                variant="gradient"
+                className="flex-1"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+              </Button>
+              <Button
+                onClick={onDownloadAnswerKey}
+                size="lg"
+                variant="outline"
+                className="flex-1"
+                disabled={isGeneratingAnswerKey || !answerKeyReady}
+              >
+                {isGeneratingAnswerKey ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Generating Answers...
+                  </>
+                ) : !answerKeyReady ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Preparing...
+                  </>
+                ) : (
+                  <>
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    Download Answer Key
+                  </>
+                )}
+              </Button>
+            </div>
+            {/* Backup link for users who can't download */}
+            <BackupLinkButton jobId={job.jobId} />
           </div>
         ) : (
           // Locked state - vibrant payment prompt with discount
@@ -247,5 +252,58 @@ export function ExamResult({
         isLoading={isPurchasing}
       />
     </div>
+  );
+}
+
+// Backup link component for when download fails
+function BackupLinkButton({ jobId }: { jobId: string }) {
+  const [copied, setCopied] = useState(false);
+  
+  const handleCopyLink = async () => {
+    // Create a shareable URL with job_id that will auto-select this job
+    const url = `${window.location.origin}/?job_id=${jobId}&payment=success`;
+    
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast({
+        title: "链接已复制",
+        description: "可在其他浏览器中打开此链接",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setCopied(true);
+      toast({
+        title: "链接已复制",
+        description: "可在其他浏览器中打开此链接",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+  
+  return (
+    <button
+      onClick={handleCopyLink}
+      className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+    >
+      {copied ? (
+        <>
+          <Check className="h-3 w-3 text-success" />
+          <span>已复制!</span>
+        </>
+      ) : (
+        <>
+          <Copy className="h-3 w-3" />
+          <span>下载有问题? 复制备用链接</span>
+        </>
+      )}
+    </button>
   );
 }
