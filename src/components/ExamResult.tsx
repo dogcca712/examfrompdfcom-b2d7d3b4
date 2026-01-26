@@ -2,15 +2,8 @@ import { FileText, Lock, RefreshCw, Calendar, File, Sparkles, Download, BookOpen
 import { Button } from "@/components/ui/button";
 import { ExamJob } from "@/types/exam";
 import { API_BASE, getAccessToken } from "@/lib/api";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { UnlockPaymentDialog } from "./UnlockPaymentDialog";
-
-// Detect if user is on mobile device
-const isMobileDevice = () => {
-  if (typeof window === 'undefined') return false;
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-    || window.innerWidth < 768;
-};
 
 interface ExamResultProps {
   job: ExamJob;
@@ -129,27 +122,8 @@ export function ExamResult({
         </div>
         
         {/* PDF Preview Area */}
-        <div className={`w-full bg-muted/20 ${isMobileDevice() ? 'py-8' : 'h-[500px]'}`}>
-          {isMobileDevice() ? (
-            // Mobile-friendly view - no PDF preview, just success message
-            <div className="flex items-center justify-center p-6">
-              <div className="text-center space-y-4">
-                <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-success/10">
-                  <CheckCircle className="h-8 w-8 text-success" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-foreground text-lg">Exam Generated!</h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Your practice exam is ready
-                  </p>
-                </div>
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-4 py-2">
-                  <Smartphone className="h-4 w-4" />
-                  <span>PDF preview not available on mobile</span>
-                </div>
-              </div>
-            </div>
-          ) : isLoadingPdf ? (
+        <div className="h-[400px] sm:h-[500px] w-full bg-muted/20">
+          {isLoadingPdf ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto" />
@@ -162,11 +136,22 @@ export function ExamResult({
               type="application/pdf"
               className="w-full h-full"
             >
-              <div className="flex h-full items-center justify-center p-8">
-                <div className="text-center text-muted-foreground">
-                  <File className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Browser does not support PDF preview</p>
-                  <p className="text-sm">Click download to get your exam</p>
+              {/* Fallback for browsers that don't support PDF preview */}
+              <div className="flex h-full items-center justify-center p-6">
+                <div className="text-center space-y-4">
+                  <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-success/10">
+                    <CheckCircle className="h-8 w-8 text-success" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground text-lg">Exam Generated!</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Your practice exam is ready
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-4 py-2">
+                    <Smartphone className="h-4 w-4" />
+                    <span>PDF preview not supported in this browser</span>
+                  </div>
                 </div>
               </div>
             </object>
