@@ -620,6 +620,8 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
           steps={steps} 
           currentStep={currentStep}
           progressMessage={progressInfo?.message}
+          progressCurrent={progressInfo?.current}
+          progressTotal={progressInfo?.total}
         />
         {isLargeUpload && (
           <p className="mt-6 text-center text-sm text-muted-foreground">
