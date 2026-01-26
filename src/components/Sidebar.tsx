@@ -76,15 +76,17 @@ export function Sidebar({
 
   return (
     <>
-      {/* Toggle button - always visible */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="fixed left-4 top-4 z-50"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </Button>
+      {/* Toggle button - only visible when sidebar is closed */}
+      {!isOpen && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed left-4 top-4 z-50"
+          onClick={() => setIsOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+      )}
 
       {/* Overlay */}
       {isOpen && (
@@ -115,6 +117,14 @@ export function Sidebar({
             <div className="flex items-center gap-1">
               <ThemeToggle />
               <UserMenu />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setIsOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
