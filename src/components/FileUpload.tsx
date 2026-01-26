@@ -235,7 +235,7 @@ export function FileUpload({
               {isDragging ? "Drop your PDFs here" : "Upload lecture PDFs"}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Drag and drop or click to browse
+              Drag and drop or click to browse • Max 100MB per file
             </p>
           </div>
           
