@@ -1,8 +1,6 @@
-import { useState } from "react";
 import {
   FileText,
   Plus,
-  Menu,
   X,
   Clock,
   Download,
@@ -11,7 +9,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/UserMenu";
 import { ExamJob, isJobExpired } from "@/types/exam";
 import { cn } from "@/lib/utils";
@@ -23,6 +20,8 @@ interface SidebarProps {
   onSelectJob: (id: string | null) => void;
   onNewExam: () => void;
   onDeleteJob: (id: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export function Sidebar({
@@ -31,8 +30,9 @@ export function Sidebar({
   onSelectJob,
   onNewExam,
   onDeleteJob,
+  isOpen,
+  onClose,
 }: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
 
   const getExamFileName = (originalPdfName: string) => {
     const base = originalPdfName.replace(/\.pdf$/i, "");
@@ -76,21 +76,11 @@ export function Sidebar({
 
   return (
     <>
-      {/* Toggle button - always in the same position */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="fixed left-4 top-4 z-50"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </Button>
-
       {/* Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
-          onClick={() => setIsOpen(false)}
+          onClick={onClose}
         />
       )}
 
@@ -102,19 +92,27 @@ export function Sidebar({
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Header - content shifted right to avoid overlap with toggle button */}
-          <div className="flex items-center justify-between border-b border-sidebar-border p-4 pl-14">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-sidebar-border p-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <FileText className="h-4 w-4 text-primary-foreground" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70">
+                <div className="relative flex items-center">
+                  <FileText className="h-3.5 w-3.5 text-primary-foreground" />
+                </div>
               </div>
               <span className="text-lg font-semibold text-sidebar-foreground">
-                ExamGen
+                History
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <ThemeToggle />
-              <UserMenu />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={onClose}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
@@ -123,7 +121,7 @@ export function Sidebar({
             <Button
               onClick={() => {
                 onNewExam();
-                setIsOpen(false);
+                onClose();
               }}
               className="w-full justify-start gap-2"
               variant="outline"
@@ -158,7 +156,7 @@ export function Sidebar({
                     )}
                     onClick={() => {
                       onSelectJob(job.id);
-                      setIsOpen(false);
+                      onClose();
                     }}
                   >
                     <div className={cn(

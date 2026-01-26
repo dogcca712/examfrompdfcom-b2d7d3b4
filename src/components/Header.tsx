@@ -1,4 +1,6 @@
-import { FileText, ArrowRight } from "lucide-react";
+import { FileText, ArrowRight, Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
   { label: "How It Works", href: "#how-it-works" },
@@ -7,7 +9,12 @@ const navItems = [
   { label: "FAQ", href: "#faq" },
 ];
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+  showMenuButton?: boolean;
+}
+
+export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
@@ -17,20 +24,33 @@ export function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-        {/* Logo */}
-        <a href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70">
-            <div className="relative flex items-center">
-              <FileText className="h-3.5 w-3.5 text-primary-foreground" />
-              <ArrowRight className="h-2.5 w-2.5 text-primary-foreground -ml-0.5" />
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        {/* Left: Menu button (optional) + Logo */}
+        <div className="flex items-center gap-3">
+          {showMenuButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={onMenuClick}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
+          
+          <a href="/" className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-sm">
+              <div className="relative flex items-center">
+                <FileText className="h-4 w-4 text-primary-foreground" />
+                <ArrowRight className="h-3 w-3 text-primary-foreground -ml-0.5" />
+              </div>
             </div>
-          </div>
-          <span className="text-lg font-semibold">ExamFromPDF</span>
-        </a>
+            <span className="text-xl font-bold tracking-tight">ExamFromPDF</span>
+          </a>
+        </div>
 
-        {/* Navigation */}
-        <nav className="hidden items-center gap-6 md:flex">
+        {/* Center: Navigation - hidden on mobile */}
+        <nav className="hidden items-center gap-8 md:flex">
           {navItems.map((item) => (
             <button
               key={item.href}
@@ -42,9 +62,9 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Mobile: simplified - just show on desktop for now */}
-        <div className="flex items-center gap-2 md:hidden">
-          {/* Could add mobile menu here later */}
+        {/* Right: Theme toggle */}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
         </div>
       </div>
     </header>

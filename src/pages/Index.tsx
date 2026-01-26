@@ -16,6 +16,7 @@ const Index = () => {
   const [jobs, setJobs] = useState<ExamJob[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Fetch jobs on mount and when auth state changes
   useEffect(() => {
@@ -83,16 +84,21 @@ const Index = () => {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Top Navigation Header */}
-      <Header />
+      <Header 
+        showMenuButton={isAuthenticated}
+        onMenuClick={() => setIsSidebarOpen(true)}
+      />
       
-      <div className="flex flex-1 flex-col pt-14">
-        {/* Sidebar toggle is inside Sidebar component */}
+      <div className="flex flex-1 flex-col pt-16">
+        {/* Sidebar - controlled by Header menu button */}
         <Sidebar
           jobs={jobs}
           selectedJobId={selectedJobId}
           onSelectJob={setSelectedJobId}
           onNewExam={handleNewExam}
           onDeleteJob={handleDeleteJob}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
         
         {/* Main content area */}
