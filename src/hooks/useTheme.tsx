@@ -13,7 +13,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("examgen-theme") as Theme;
+      const stored = localStorage.getItem("examfrompdf-theme") as Theme;
       if (stored) return stored;
       return window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
-    localStorage.setItem("examgen-theme", theme);
+    localStorage.setItem("examfrompdf-theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {
