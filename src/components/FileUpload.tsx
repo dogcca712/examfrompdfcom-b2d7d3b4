@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const MAX_FILES = 20;
-const LARGE_UPLOAD_FILE_THRESHOLD = 10;
-const LARGE_UPLOAD_PAGE_THRESHOLD = 300;
+const MAX_FILES = 10;
+const MAX_TOTAL_SIZE = 30 * 1024 * 1024; // 30MB
+const LARGE_UPLOAD_FILE_THRESHOLD = 5;
+const LARGE_UPLOAD_PAGE_THRESHOLD = 150;
 
 interface FileUploadProps {
   files: File[];
@@ -86,13 +87,24 @@ export function FileUpload({
   const totalPages = files.reduce((sum, f) => sum + estimatePages(f.size), 0);
   const canAddMore = files.length < MAX_FILES;
   const isLargeUpload = files.length > LARGE_UPLOAD_FILE_THRESHOLD || totalPages > LARGE_UPLOAD_PAGE_THRESHOLD;
+  const isOverSizeLimit = totalSize > MAX_TOTAL_SIZE;
 
   // Has files uploaded - show file list with add more option
   if (files.length > 0) {
     return (
       <div className="space-y-4">
+        {/* Size limit exceeded warning */}
+        {isOverSizeLimit && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="text-sm">
+              Total size ({(totalSize / 1024 / 1024).toFixed(1)} MB) exceeds the 30MB limit. Please remove some files.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Large upload warning */}
-        {isLargeUpload && (
+        {isLargeUpload && !isOverSizeLimit && (
           <Alert variant="default" className="border-warning/50 bg-warning/10">
             <AlertTriangle className="h-4 w-4 text-warning" />
             <AlertDescription className="text-sm text-warning">
@@ -248,7 +260,7 @@ export function FileUpload({
               {isDragging ? "Drop your PDFs here" : "Upload lecture PDFs"}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Drag and drop or click to browse • Max 100MB total
+              Drag and drop or click to browse • Max 30MB total
             </p>
           </div>
           
