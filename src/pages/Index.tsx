@@ -170,7 +170,20 @@ const Index = () => {
   }, []);
 
   const handleDeleteJob = useCallback(
-    (id: string) => {
+    async (id: string) => {
+      // Find the job to get its jobId for the API call
+      const jobToDelete = jobs.find((job) => job.id === id);
+      
+      // For authenticated users, delete from backend
+      if (isAuthenticated && jobToDelete?.jobId) {
+        try {
+          await jobsApi.deleteJob(jobToDelete.jobId);
+        } catch (error) {
+          console.error("Failed to delete job from backend:", error);
+          // Continue with local delete even if backend fails
+        }
+      }
+      
       setJobs((prev) => {
         const newJobs = prev.filter((job) => job.id !== id);
         // Save to localStorage for anonymous users
@@ -183,7 +196,7 @@ const Index = () => {
         setSelectedJobId(null);
       }
     },
-    [selectedJobId, isAuthenticated]
+    [selectedJobId, isAuthenticated, jobs]
   );
 
   // Select job by jobId (backend ID, not frontend UUID)
