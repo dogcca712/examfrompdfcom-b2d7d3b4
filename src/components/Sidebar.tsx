@@ -76,11 +76,11 @@ export function Sidebar({
 
   return (
     <>
-      {/* Mobile toggle */}
+      {/* Toggle button - always visible */}
       <Button
         variant="ghost"
         size="icon"
-        className="fixed left-4 top-4 z-50 md:hidden"
+        className="fixed left-4 top-4 z-50"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -89,15 +89,15 @@ export function Sidebar({
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - always hidden by default, slides in from left */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-full w-72 border-r border-sidebar-border bg-sidebar transition-transform duration-300 md:relative md:translate-x-0",
+          "fixed left-0 top-0 z-40 h-full w-72 border-r border-sidebar-border bg-sidebar transition-transform duration-300",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
