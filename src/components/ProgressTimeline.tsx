@@ -10,6 +10,7 @@ interface ProgressTimelineProps {
   steps: Step[];
   currentStep: number;
   failed?: boolean;
+  progressMessage?: string;
 }
 
 const defaultSteps: Step[] = [
@@ -23,6 +24,7 @@ export function ProgressTimeline({
   steps = defaultSteps,
   currentStep,
   failed,
+  progressMessage,
 }: ProgressTimelineProps) {
   return (
     <div className="rounded-2xl border border-border bg-card p-8 sm:p-10 shadow-lg">
@@ -72,6 +74,11 @@ export function ProgressTimeline({
                   {step.label}
                   {isCurrent && !failed && "..."}
                 </p>
+                {isCurrent && progressMessage && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {progressMessage}
+                  </p>
+                )}
               </div>
             </div>
           );
