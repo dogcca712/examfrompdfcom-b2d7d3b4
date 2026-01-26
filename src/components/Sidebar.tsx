@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   FileText,
   Plus,
@@ -6,13 +7,17 @@ import {
   Download,
   Trash2,
   AlertCircle,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/UserMenu";
 import { ExamJob, isJobExpired } from "@/types/exam";
 import { cn } from "@/lib/utils";
 import { downloadPdfWithAuth } from "@/lib/download";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
   jobs: ExamJob[];
@@ -33,6 +38,7 @@ export function Sidebar({
   isOpen,
   onClose,
 }: SidebarProps) {
+  const { isAuthenticated } = useAuth();
 
   const getExamFileName = (originalPdfName: string) => {
     const base = originalPdfName.replace(/\.pdf$/i, "");
@@ -87,58 +93,82 @@ export function Sidebar({
       {/* Sidebar - always hidden by default, slides in from left */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-full w-72 border-r border-sidebar-border bg-sidebar transition-transform duration-300",
+          "fixed left-0 top-0 z-40 h-full w-80 border-r border-sidebar-border bg-sidebar transition-transform duration-300",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-sidebar-border p-4">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70">
-                <div className="relative flex items-center">
-                  <FileText className="h-3.5 w-3.5 text-primary-foreground" />
-                </div>
+          <div className="flex items-center justify-between border-b border-sidebar-border p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-sm">
+                <FileText className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold text-sidebar-foreground">
-                History
+              <span className="text-xl font-bold text-sidebar-foreground">
+                Menu
               </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-10 w-10"
                 onClick={onClose}
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </Button>
             </div>
           </div>
 
+          {/* Auth Section */}
+          <div className="border-b border-sidebar-border p-4">
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <UserMenu />
+                <span className="text-sm text-muted-foreground">Account</span>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <Button asChild className="w-full justify-start gap-3 h-11 text-base">
+                  <Link to="/register" onClick={onClose}>
+                    <UserPlus className="h-5 w-5" />
+                    Sign Up
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start gap-3 h-11 text-base">
+                  <Link to="/login" onClick={onClose}>
+                    <LogIn className="h-5 w-5" />
+                    Sign In
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </div>
+
           {/* New Exam Button */}
-          <div className="p-3">
+          <div className="p-4">
             <Button
               onClick={() => {
                 onNewExam();
                 onClose();
               }}
-              className="w-full justify-start gap-2"
+              className="w-full justify-start gap-3 h-11 text-base"
               variant="outline"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               New Exam
             </Button>
           </div>
 
           {/* History */}
-          <div className="flex-1 overflow-y-auto p-3">
-            <h3 className="mb-2 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              History
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
+            <h3 className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Recent Exams
             </h3>
             <div className="space-y-1">
               {jobs.length === 0 ? (
-                <p className="px-2 py-4 text-center text-sm text-muted-foreground">
+                <p className="px-2 py-6 text-center text-sm text-muted-foreground">
                   No exams generated yet
                 </p>
               ) : (

@@ -1,6 +1,5 @@
 import { FileText, ArrowRight, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
   { label: "How It Works", href: "#how-it-works" },
@@ -11,10 +10,9 @@ const navItems = [
 
 interface HeaderProps {
   onMenuClick?: () => void;
-  showMenuButton?: boolean;
 }
 
-export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
+export function Header({ onMenuClick }: HeaderProps) {
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
@@ -25,18 +23,16 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
   return (
     <header className="fixed top-0 left-0 right-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Left: Menu button (optional) + Logo */}
+        {/* Left: Menu button + Logo */}
         <div className="flex items-center gap-4">
-          {showMenuButton && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10"
-              onClick={onMenuClick}
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11"
+            onClick={onMenuClick}
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
           
           <a href="/" className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-sm">
@@ -62,10 +58,8 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
           ))}
         </nav>
 
-        {/* Right: Theme toggle */}
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-        </div>
+        {/* Right: empty for balance */}
+        <div className="w-11 lg:w-0" />
       </div>
     </header>
   );

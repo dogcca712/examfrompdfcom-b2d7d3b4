@@ -84,10 +84,7 @@ const Index = () => {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Top Navigation Header */}
-      <Header 
-        showMenuButton={isAuthenticated}
-        onMenuClick={() => setIsSidebarOpen(true)}
-      />
+      <Header onMenuClick={() => setIsSidebarOpen(true)} />
       
       <div className="flex flex-1 flex-col pt-20">
         {/* Sidebar - controlled by Header menu button */}
