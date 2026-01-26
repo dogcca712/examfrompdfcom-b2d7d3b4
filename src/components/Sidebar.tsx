@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   FileText,
+  ArrowRight,
   Plus,
   X,
   Clock,
@@ -100,14 +101,17 @@ export function Sidebar({
         <div className="flex h-full flex-col">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-sidebar-border p-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-sm">
-                <FileText className="h-5 w-5 text-primary-foreground" />
+            <a href="/" className="flex items-center gap-3" onClick={onClose}>
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-sm">
+                <div className="relative flex items-center">
+                  <FileText className="h-5 w-5 text-primary-foreground" />
+                  <ArrowRight className="h-4 w-4 text-primary-foreground -ml-1" />
+                </div>
               </div>
               <span className="text-xl font-bold text-sidebar-foreground">
-                Menu
+                ExamFromPDF
               </span>
-            </div>
+            </a>
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <Button
