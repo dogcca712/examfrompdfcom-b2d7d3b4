@@ -62,8 +62,8 @@ export function HowItWorks() {
                 key={step.title}
                 className="group relative flex flex-col items-center text-center"
               >
-                {/* Step number badge */}
-                <div className="absolute -top-3 right-1/2 translate-x-8 text-xs font-semibold text-muted-foreground md:right-auto md:translate-x-0">
+                {/* Step number badge - positioned above icon with more space */}
+                <div className="mb-3 text-sm font-semibold text-muted-foreground">
                   Step {index + 1}
                 </div>
 
