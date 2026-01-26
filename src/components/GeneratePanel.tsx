@@ -30,6 +30,11 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
   const [config, setConfig] = useState<ExamConfig>(defaultExamConfig);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [progressInfo, setProgressInfo] = useState<{
+    message?: string;
+    current?: number;
+    total?: number;
+  } | null>(null);
   const [error, setError] = useState<{ message: string; details?: string } | null>(null);
 
   // Payment state for per-download purchases
@@ -52,7 +57,24 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
       let notFoundRetries = 0;
       const MAX_NOT_FOUND_RETRIES = 5;
 
-      const pollOnce = async (): Promise<{ status: string; error?: string }> => {
+      // Map backend stage to step index
+      const stageToStep: Record<string, number> = {
+        extracting: 0,
+        writing: 1,
+        formatting: 2,
+        generating: 3,
+      };
+
+      const pollOnce = async (): Promise<{
+        status: string;
+        error?: string;
+        progress?: {
+          stage: string;
+          current: number;
+          total: number;
+          message: string;
+        };
+      }> => {
         const headers: HeadersInit = {};
         const token = getAccessToken();
         if (token) {
@@ -90,14 +112,26 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
             const result = await pollOnce();
 
             if (result.status === "pending" || result.status === "queued" || result.status === "running") {
-              // Update progress step
-              if (stepIndex < steps.length - 1) {
-                stepIndex++;
-                setCurrentStep(stepIndex);
+              // Update progress from backend if available
+              if (result.progress) {
+                const newStep = stageToStep[result.progress.stage] ?? stepIndex;
+                setCurrentStep(newStep);
+                setProgressInfo({
+                  message: result.progress.message,
+                  current: result.progress.current,
+                  total: result.progress.total,
+                });
+              } else {
+                // Fallback: increment step locally
+                if (stepIndex < steps.length - 1) {
+                  stepIndex++;
+                  setCurrentStep(stepIndex);
+                }
               }
               setTimeout(poll, POLL_INTERVAL);
             } else if (result.status === "done") {
               setCurrentStep(steps.length - 1);
+              setProgressInfo(null);
               resolve();
             } else if (result.status === "failed") {
               reject(new Error(result.error || "Job failed"));
@@ -143,6 +177,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     setIsGenerating(true);
     setError(null);
     setCurrentStep(0);
+    setProgressInfo(null);
 
     // Use first file name for job display, indicate multiple files
     const displayName = files.length > 1 ? `${files[0].name} (+${files.length - 1} more)` : files[0].name;
@@ -552,23 +587,39 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
   const isLargeUpload = savedFiles.length > 10 || totalPages > 300;
   
   if (isGenerating) {
+    // Calculate progress percentage from backend data
+    const progressPercent = progressInfo?.current && progressInfo?.total
+      ? Math.round((progressInfo.current / progressInfo.total) * 100)
+      : null;
+
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:py-16">
         <div className="mb-8 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Generating your exam...</h2>
           <p className="mt-2 text-base text-muted-foreground">
-            {isLargeUpload 
-              ? `Processing ${savedFiles.length} PDFs (~${totalPages} pages). This may take 3-5 minutes.`
-              : "This usually takes 30-60 seconds"
+            {progressInfo?.message 
+              ? progressInfo.message
+              : isLargeUpload 
+                ? `Processing ${savedFiles.length} PDFs (~${totalPages} pages). This may take 3-5 minutes.`
+                : "This usually takes 30-60 seconds"
             }
           </p>
-          {savedFiles.length > 1 && (
+          {progressPercent !== null && (
+            <p className="mt-2 text-lg font-semibold text-primary">
+              {progressPercent}% complete
+            </p>
+          )}
+          {savedFiles.length > 1 && !progressInfo?.message && (
             <p className="mt-1 text-sm text-muted-foreground/80">
               📄 {savedFiles.length} files combined
             </p>
           )}
         </div>
-        <ProgressTimeline steps={steps} currentStep={currentStep} />
+        <ProgressTimeline 
+          steps={steps} 
+          currentStep={currentStep}
+          progressMessage={progressInfo?.message}
+        />
         {isLargeUpload && (
           <p className="mt-6 text-center text-sm text-muted-foreground">
             ⏳ Large upload detected. Please keep this page open and don't refresh.
