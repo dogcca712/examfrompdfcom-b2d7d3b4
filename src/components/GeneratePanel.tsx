@@ -15,6 +15,7 @@ import { downloadPdfWithAuth, isLineInAppBrowser } from "@/lib/download";
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const POLL_INTERVAL = 2000; // 2 seconds
+const GENERATE_TIMEOUT = 300000; // 5 minutes timeout for large uploads
 
 interface GeneratePanelProps {
   selectedJob: ExamJob | null;
@@ -182,12 +183,29 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
 
       let response: Response;
       try {
+        // Create AbortController for 5-minute timeout (large uploads need more time)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), GENERATE_TIMEOUT);
+        
         response = await fetch(`${API_BASE}/generate`, {
           method: "POST",
           headers,
           body: formData,
+          signal: controller.signal,
         });
+        
+        clearTimeout(timeoutId);
       } catch (fetchError) {
+        // Handle timeout (AbortError)
+        if (fetchError instanceof Error && fetchError.name === "AbortError") {
+          throw new Error(
+            `Request timed out after 5 minutes. Your upload may be too large.\n` +
+              `Suggestions:\n` +
+              `1. Try uploading fewer PDFs at once\n` +
+              `2. Split large documents into smaller files\n` +
+              `3. Ensure a stable network connection`,
+          );
+        }
         // Handle network errors (CORS, connection refused, etc.)
         if (fetchError instanceof TypeError && fetchError.message.includes("fetch")) {
           throw new Error(
@@ -528,14 +546,34 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
   }
 
   // Show progress during generation
+  // Calculate estimated pages for time estimate
+  const estimatePages = (size: number) => Math.max(1, Math.round(size / 100000));
+  const totalPages = savedFiles.reduce((sum, f) => sum + estimatePages(f.size), 0);
+  const isLargeUpload = savedFiles.length > 10 || totalPages > 300;
+  
   if (isGenerating) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:py-16">
         <div className="mb-8 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Generating your exam...</h2>
-          <p className="mt-2 text-base text-muted-foreground">This usually takes 30-60 seconds</p>
+          <p className="mt-2 text-base text-muted-foreground">
+            {isLargeUpload 
+              ? `Processing ${savedFiles.length} PDFs (~${totalPages} pages). This may take 3-5 minutes.`
+              : "This usually takes 30-60 seconds"
+            }
+          </p>
+          {savedFiles.length > 1 && (
+            <p className="mt-1 text-sm text-muted-foreground/80">
+              📄 {savedFiles.length} files combined
+            </p>
+          )}
         </div>
         <ProgressTimeline steps={steps} currentStep={currentStep} />
+        {isLargeUpload && (
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            ⏳ Large upload detected. Please keep this page open and don't refresh.
+          </p>
+        )}
       </div>
     );
   }
