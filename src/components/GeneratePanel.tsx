@@ -15,7 +15,7 @@ import { downloadPdfWithAuth, isLineInAppBrowser } from "@/lib/download";
 
 const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
 const POLL_INTERVAL = 2000; // 2 seconds
-const GENERATE_TIMEOUT = 300000; // 5 minutes timeout for large uploads
+const SINGLE_UPLOAD_TIMEOUT = 60000; // 1 minute per file
 
 interface GeneratePanelProps {
   selectedJob: ExamJob | null;
@@ -37,6 +37,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
   } | null>(null);
   const [error, setError] = useState<{ message: string; details?: string } | null>(null);
   const [uploadPhase, setUploadPhase] = useState<'idle' | 'uploading' | 'processing'>('idle');
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
 
   // Payment state for per-download purchases
   const [isPurchasing, setIsPurchasing] = useState(false);
@@ -152,6 +153,43 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     [steps.length],
   );
 
+  // Upload a single file to backend
+  const uploadSingleFile = useCallback(async (file: File, sessionId: string, token: string | null): Promise<void> => {
+    const formData = new FormData();
+    formData.append("lecture_pdf", file);
+    formData.append("session_id", sessionId);
+
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), SINGLE_UPLOAD_TIMEOUT);
+
+    try {
+      const response = await fetch(`${API_BASE}/upload`, {
+        method: "POST",
+        headers,
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Upload failed");
+        throw new Error(`Failed to upload ${file.name}: ${errorText}`);
+      }
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err instanceof Error && err.name === "AbortError") {
+        throw new Error(`Upload timeout for ${file.name}. Please check your network connection.`);
+      }
+      throw err;
+    }
+  }, []);
+
   const generateExam = useCallback(async () => {
     if (files.length === 0) return;
 
@@ -160,7 +198,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     if (totalSize > MAX_FILE_SIZE) {
       setError({
         message: "Files too large",
-        details: `Total size ${(totalSize / (1024 * 1024)).toFixed(2)}MB exceeds 100MB limit.`,
+        details: `Total size ${(totalSize / (1024 * 1024)).toFixed(2)}MB exceeds 30MB limit.`,
       });
       return;
     }
@@ -180,7 +218,8 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     setError(null);
     setCurrentStep(0);
     setProgressInfo(null);
-    setUploadPhase('uploading'); // Start in upload phase
+    setUploadPhase('uploading');
+    setUploadProgress({ current: 0, total: files.length });
 
     // Use first file name for job display, indicate multiple files
     const displayName = files.length > 1 ? `${files[0].name} (+${files.length - 1} more)` : files[0].name;
@@ -194,87 +233,57 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     };
     onJobCreate(newJob);
 
-    try {
-      // Step 1: Submit the job with auth
-      const formData = new FormData();
-      // Append all files with same field name for FastAPI List[UploadFile]
-      files.forEach((file) => {
-        formData.append("lecture_pdf", file);
-      });
+    // Get token if available (optional for guest users)
+    const token = getAccessToken();
 
-      // Append exam settings to the request (send 0 for disabled types)
-      formData.append("mcq_count", config.mcqEnabled ? config.mcqCount.toString() : "0");
-      formData.append("short_answer_count", config.shortAnswerEnabled ? config.shortAnswerCount.toString() : "0");
-      formData.append("long_question_count", config.longQuestionEnabled ? config.longQuestionCount.toString() : "0");
-      formData.append("difficulty", config.difficulty);
-      if (config.specialRequests.trim()) {
-        formData.append("special_requests", config.specialRequests.trim());
+    try {
+      // Generate a unique session ID for this batch upload
+      const sessionId = crypto.randomUUID();
+
+      // Step 1: Upload files one by one
+      for (let i = 0; i < files.length; i++) {
+        setUploadProgress({ current: i + 1, total: files.length });
+        await uploadSingleFile(files[i], sessionId, token);
       }
 
-      // Get token if available (optional for guest users)
-      const token = getAccessToken();
-
-      const headers: HeadersInit = {};
+      // Step 2: Trigger generation with session ID and config
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      let response: Response;
-      try {
-        // Create AbortController for 5-minute timeout (large uploads need more time)
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), GENERATE_TIMEOUT);
-        
-        response = await fetch(`${API_BASE}/generate`, {
-          method: "POST",
-          headers,
-          body: formData,
-          signal: controller.signal,
-        });
-        
-        clearTimeout(timeoutId);
-      } catch (fetchError) {
-        // Handle timeout (AbortError)
-        if (fetchError instanceof Error && fetchError.name === "AbortError") {
-          throw new Error(
-            `Request timed out after 5 minutes. Your upload may be too large.\n` +
-              `Suggestions:\n` +
-              `1. Try uploading fewer PDFs at once\n` +
-              `2. Split large documents into smaller files\n` +
-              `3. Ensure a stable network connection`,
-          );
-        }
-        // Handle network errors (CORS, connection refused, etc.)
-        if (fetchError instanceof TypeError && fetchError.message.includes("fetch")) {
-          throw new Error(
-            `Network error: Unable to connect to ${API_BASE}. ` +
-              `Please check:\n` +
-              `1. Backend service is running\n` +
-              `2. CORS is configured correctly\n` +
-              `3. Network connection is stable`,
-          );
-        }
-        throw fetchError;
-      }
+      const generateResponse = await fetch(`${API_BASE}/generate`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          session_id: sessionId,
+          mcq_count: config.mcqEnabled ? config.mcqCount : 0,
+          short_answer_count: config.shortAnswerEnabled ? config.shortAnswerCount : 0,
+          long_question_count: config.longQuestionEnabled ? config.longQuestionCount : 0,
+          difficulty: config.difficulty,
+          special_requests: config.specialRequests.trim() || undefined,
+        }),
+      });
 
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => "Unknown error");
+      if (!generateResponse.ok) {
+        const errorText = await generateResponse.text().catch(() => "Unknown error");
 
-        // Provide more specific error messages
-        if (response.status === 401 && isAuthenticated) {
+        if (generateResponse.status === 401 && isAuthenticated) {
           throw new Error("Authentication failed. Please log in again.");
-        } else if (response.status === 403) {
+        } else if (generateResponse.status === 403) {
           throw new Error("Permission denied. You may have reached your usage limit.");
-        } else if (response.status === 404) {
+        } else if (generateResponse.status === 404) {
           throw new Error(`Endpoint not found: ${API_BASE}/generate`);
-        } else if (response.status >= 500) {
-          throw new Error(`Server error (${response.status}): ${errorText || "Internal server error"}`);
+        } else if (generateResponse.status >= 500) {
+          throw new Error(`Server error (${generateResponse.status}): ${errorText || "Internal server error"}`);
         } else {
-          throw new Error(`Request failed (${response.status}): ${errorText || "Unknown error"}`);
+          throw new Error(`Request failed (${generateResponse.status}): ${errorText || "Unknown error"}`);
         }
       }
 
-      const data = await response.json();
+      const data = await generateResponse.json();
       const jobId = data.job_id;
 
       if (!jobId) {
@@ -341,8 +350,9 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     } finally {
       setIsGenerating(false);
       setUploadPhase('idle');
+      setUploadProgress(null);
     }
-  }, [files, config, isAuthenticated, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage]);
+  }, [files, config, isAuthenticated, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage, uploadSingleFile]);
 
   const handleRetry = () => {
     setError(null);
@@ -608,7 +618,9 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
           </h2>
           <p className="mt-2 text-base text-muted-foreground">
             {uploadPhase === 'uploading' 
-              ? `Uploading ${savedFiles.length} PDF${savedFiles.length > 1 ? 's' : ''} (${totalSizeMB.toFixed(1)} MB). Large uploads may take several minutes.`
+              ? uploadProgress 
+                ? `Uploading file ${uploadProgress.current} of ${uploadProgress.total}...`
+                : `Preparing to upload ${savedFiles.length} PDF${savedFiles.length > 1 ? 's' : ''}...`
               : progressInfo?.message 
                 ? progressInfo.message
                 : isLargeUpload 
@@ -617,10 +629,10 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
             }
           </p>
           {uploadPhase === 'uploading' && (
-              <p className="text-sm text-muted-foreground">
-                ⏳ Please keep this page open. Do not refresh or navigate away.
-              </p>
-            )}
+            <p className="text-sm text-muted-foreground mt-1">
+              ⏳ Please keep this page open. Do not refresh or navigate away.
+            </p>
+          )}
           {progressPercent !== null && uploadPhase === 'processing' && (
             <p className="mt-2 text-lg font-semibold text-primary">
               {progressPercent}% complete
@@ -642,10 +654,23 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
                   <div className="h-12 w-12 rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
                 </div>
               </div>
-              <p className="text-lg font-medium text-foreground">Transmitting to server...</p>
+              <p className="text-lg font-medium text-foreground">
+                {uploadProgress 
+                  ? `Uploading ${uploadProgress.current}/${uploadProgress.total}...`
+                  : 'Preparing upload...'
+                }
+              </p>
               <p className="text-sm text-muted-foreground">
                 {savedFiles.length} file{savedFiles.length > 1 ? 's' : ''} • {totalSizeMB.toFixed(1)} MB total
               </p>
+              {uploadProgress && (
+                <div className="w-full max-w-xs bg-secondary rounded-full h-2 mt-2">
+                  <div 
+                    className="bg-primary h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         ) : (
