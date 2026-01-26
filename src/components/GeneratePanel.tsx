@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { FileUpload } from "./FileUpload";
@@ -22,10 +23,12 @@ interface GeneratePanelProps {
   onJobCreate: (job: ExamJob) => void;
   onJobUpdate: (job: ExamJob) => void;
   onClearSelection: () => void;
+  onSelectJobById?: (jobId: string) => void;
 }
 
-export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSelection }: GeneratePanelProps) {
+export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSelection, onSelectJobById }: GeneratePanelProps) {
   const { refreshUsage, isAuthenticated } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [files, setFiles] = useState<File[]>([]);
   const [config, setConfig] = useState<ExamConfig>(defaultExamConfig);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -46,6 +49,43 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
   // Answer key generation state (deferred until after payment)
   const [isGeneratingAnswerKey, setIsGeneratingAnswerKey] = useState(false);
   const [answerKeyReady, setAnswerKeyReady] = useState(false);
+
+  // Handle payment success callback from Stripe
+  useEffect(() => {
+    const paymentStatus = searchParams.get("payment");
+    const returnedJobId = searchParams.get("job_id");
+    const pendingJobId = localStorage.getItem("pending_payment_job_id");
+    
+    // Check if this is a payment success callback
+    if (paymentStatus === "success" && (returnedJobId || pendingJobId)) {
+      const jobIdToUnlock = returnedJobId || pendingJobId;
+      
+      // Clear the URL parameters and localStorage
+      searchParams.delete("payment");
+      searchParams.delete("job_id");
+      setSearchParams(searchParams, { replace: true });
+      localStorage.removeItem("pending_payment_job_id");
+      
+      // Mark job as unlocked
+      setUnlockedJobs((prev) => new Set(prev).add(jobIdToUnlock!));
+      toast.success("支付成功！正在生成答案...");
+      
+      // Select the job if callback provided
+      if (onSelectJobById && jobIdToUnlock) {
+        onSelectJobById(jobIdToUnlock);
+      }
+      
+      // Start generating answer key
+      generateAnswerKey(jobIdToUnlock!);
+    } else if (paymentStatus === "cancel") {
+      // Payment was cancelled
+      searchParams.delete("payment");
+      searchParams.delete("job_id");
+      setSearchParams(searchParams, { replace: true });
+      localStorage.removeItem("pending_payment_job_id");
+      toast.error("支付已取消");
+    }
+  }, [searchParams, setSearchParams, onSelectJobById]);
 
   const steps = [
     { id: "extract", label: "Extracting text" },
