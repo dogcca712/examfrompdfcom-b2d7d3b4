@@ -149,6 +149,11 @@ export const jobsApi = {
     apiRequest<{ jobs: JobResponse[]; total: number }>(
       `/jobs?limit=${limit}&offset=${offset}`
     ),
+  deleteJob: (jobId: string) =>
+    apiRequest<{ message: string; job_id: string }>(
+      `/jobs/${jobId}`,
+      { method: "DELETE" }
+    ),
 };
 
 // Export API_BASE for use in other modules

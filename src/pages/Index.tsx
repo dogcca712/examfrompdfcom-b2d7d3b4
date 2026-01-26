@@ -92,10 +92,19 @@ const Index = () => {
   }, []);
 
   const handleDeleteJob = useCallback(
-    (id: string) => {
-      setJobs((prev) => prev.filter((job) => job.id !== id));
-      if (selectedJobId === id) {
-        setSelectedJobId(null);
+    async (id: string) => {
+      try {
+        // Call backend API to delete the job
+        await jobsApi.deleteJob(id);
+        // Only update local state after successful deletion
+        setJobs((prev) => prev.filter((job) => job.id !== id));
+        if (selectedJobId === id) {
+          setSelectedJobId(null);
+        }
+      } catch (error) {
+        console.error("Failed to delete job:", error);
+        // Optionally show an error message to the user
+        alert("Failed to delete job. Please try again.");
       }
     },
     [selectedJobId]
