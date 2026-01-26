@@ -12,7 +12,7 @@ const faqs = [
   },
   {
     question: "What question types are available?",
-    answer: "ExamGen supports multiple choice questions (MCQs), short answer questions, and essay/long-form questions. You can choose your preferred mix and difficulty level before generating.",
+    answer: "ExamFromPDF supports multiple choice questions (MCQs), short answer questions, and essay/long-form questions. You can choose your preferred mix and difficulty level before generating.",
   },
   {
     question: "How is the exam formatted?",
@@ -24,7 +24,7 @@ const faqs = [
   },
   {
     question: "How does pricing work?",
-    answer: "ExamGen uses a simple pay-per-download model. You can generate and preview exams for free. When you're satisfied with the result, pay $0.99 to unlock the full PDF download with answer key.",
+    answer: "ExamFromPDF uses a simple pay-per-download model. You can generate and preview exams for free. When you're satisfied with the result, pay $0.99 to unlock the full PDF download with answer key.",
   },
   {
     question: "Is my data secure?",
@@ -49,7 +49,7 @@ export function FAQ() {
             Frequently Asked Questions
           </h2>
           <p className="text-lg text-muted-foreground">
-            Everything you need to know about ExamGen
+            Everything you need to know about ExamFromPDF
           </p>
         </div>
 
