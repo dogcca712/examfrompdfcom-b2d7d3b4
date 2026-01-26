@@ -122,16 +122,18 @@ export function GeneratePanel({
   const generateExam = useCallback(async () => {
     if (files.length === 0) return;
 
-    // Validate all files
-    for (const file of files) {
-      if (file.size > MAX_FILE_SIZE) {
-        setError({
-          message: "File too large",
-          details: `"${file.name}" exceeds 20MB limit (${(file.size / (1024 * 1024)).toFixed(2)}MB).`,
-        });
-        return;
-      }
+    // Validate total file size
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+    if (totalSize > MAX_FILE_SIZE) {
+      setError({
+        message: "Files too large",
+        details: `Total size ${(totalSize / (1024 * 1024)).toFixed(2)}MB exceeds 100MB limit.`,
+      });
+      return;
+    }
 
+    // Validate all files are PDFs
+    for (const file of files) {
       if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
         setError({
           message: "Invalid file type",
