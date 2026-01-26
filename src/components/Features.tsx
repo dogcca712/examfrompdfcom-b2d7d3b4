@@ -50,11 +50,11 @@ export function Features() {
             Features
           </span>
           <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-            Everything You Need to Ace Your Exams
+            Simple, Clean, No Nonsense
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Our AI exam generator combines cutting-edge technology with professional formatting 
-            to create the perfect practice experience.
+            We focus on doing one thing well: turning your lecture PDFs into 
+            professional practice exams. No bloat, no complexity.
           </p>
         </div>
 

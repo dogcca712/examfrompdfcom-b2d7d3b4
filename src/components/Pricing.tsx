@@ -24,11 +24,11 @@ export function Pricing() {
             Simple Pricing
           </span>
           <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-            Pay Only for What You Download
+            No Subscriptions. No Gimmicks.
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            No subscriptions, no hidden fees. Generate as many exams as you want — 
-            only pay when you're ready to download.
+            We believe in transparency. Generate as many exams as you want for free — 
+            pay only $0.99 when you're ready to download. That's it.
           </p>
         </div>
 
