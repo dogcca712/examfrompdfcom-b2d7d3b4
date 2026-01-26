@@ -7,32 +7,24 @@ import {
 
 const faqs = [
   {
-    question: "What types of PDFs can I upload?",
-    answer: "You can upload lecture notes, textbooks, study guides, or any educational material in PDF format. Our AI works best with text-based PDFs, but can also process scanned documents with OCR. Files up to 100MB are supported.",
+    question: "How does the PDF exam generator work?",
+    answer: "Upload your lecture notes or study materials, and our AI analyzes the content to generate practice exams automatically. The process takes just seconds and requires no technical setup.",
   },
   {
-    question: "What question types are available?",
-    answer: "ExamFromPDF supports multiple choice questions (MCQs), short answer questions, and essay/long-form questions. You can choose your preferred mix and difficulty level before generating.",
+    question: "Can I generate exams from any PDF?",
+    answer: "Yes, you can generate exams from PDF files including lecture slides, textbooks, and study guides. The AI quiz generator works best with text-based educational content.",
   },
   {
-    question: "How is the exam formatted?",
-    answer: "Your practice exam is professionally typeset using LaTeX, the same system used by academic journals and textbooks. This ensures clean formatting, proper mathematical notation, and print-ready quality.",
+    question: "What types of questions can the AI generate?",
+    answer: "The tool creates multiple choice questions, short answer prompts, and essay-style questions. You can choose your preferred format and difficulty level before generating.",
   },
   {
-    question: "Do I need to create an account?",
-    answer: "No account is required to generate your first exam. You can try the service immediately. Creating a free account lets you access your exam history and manage downloads.",
+    question: "Is signup required to use this tool?",
+    answer: "No account is needed to create your first practice exam. You can start generating immediately and create an account later to save your exam history.",
   },
   {
-    question: "How does pricing work?",
-    answer: "ExamFromPDF uses a simple pay-per-download model. You can generate and preview exams for free. When you're satisfied with the result, pay $0.99 to unlock the full PDF download with answer key.",
-  },
-  {
-    question: "Is my data secure?",
-    answer: "Yes, your documents are processed securely and are never stored permanently. We use encryption for all file transfers, and your uploaded PDFs are automatically deleted after processing.",
-  },
-  {
-    question: "Can I get a refund?",
-    answer: "If you're not satisfied with your generated exam, contact our support team within 24 hours of purchase. We'll review your case and provide a refund if the output quality doesn't meet our standards.",
+    question: "Is my PDF content secure?",
+    answer: "Yes, your documents are processed securely and never stored permanently. All uploaded files are automatically deleted after processing to protect your content.",
   },
 ];
 
