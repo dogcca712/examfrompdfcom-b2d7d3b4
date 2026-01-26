@@ -11,6 +11,8 @@ interface ProgressTimelineProps {
   currentStep: number;
   failed?: boolean;
   progressMessage?: string;
+  progressCurrent?: number;
+  progressTotal?: number;
 }
 
 const defaultSteps: Step[] = [
@@ -25,6 +27,8 @@ export function ProgressTimeline({
   currentStep,
   failed,
   progressMessage,
+  progressCurrent,
+  progressTotal,
 }: ProgressTimelineProps) {
   return (
     <div className="rounded-2xl border border-border bg-card p-8 sm:p-10 shadow-lg">
@@ -73,6 +77,11 @@ export function ProgressTimeline({
                 >
                   {step.label}
                   {isCurrent && !failed && "..."}
+                  {isCurrent && progressCurrent !== undefined && progressTotal !== undefined && (
+                    <span className="ml-2 text-primary font-semibold">
+                      ({progressCurrent}/{progressTotal} PDFs)
+                    </span>
+                  )}
                 </p>
                 {isCurrent && progressMessage && (
                   <p className="mt-1 text-sm text-muted-foreground">
