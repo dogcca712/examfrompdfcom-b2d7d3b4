@@ -44,7 +44,29 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
 
   // Payment state for per-download purchases
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const [unlockedJobs, setUnlockedJobs] = useState<Set<string>>(new Set());
+  
+  // Persist unlocked jobs in localStorage so they survive page refresh
+  const [unlockedJobs, setUnlockedJobs] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem("unlocked_jobs");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          return new Set(parsed);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to parse unlocked jobs from localStorage:", e);
+    }
+    return new Set();
+  });
+  
+  // Sync unlocked jobs to localStorage whenever it changes
+  useEffect(() => {
+    if (unlockedJobs.size > 0) {
+      localStorage.setItem("unlocked_jobs", JSON.stringify([...unlockedJobs]));
+    }
+  }, [unlockedJobs]);
 
   // Answer key generation state (deferred until after payment)
   const [isGeneratingAnswerKey, setIsGeneratingAnswerKey] = useState(false);
