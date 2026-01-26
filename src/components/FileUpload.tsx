@@ -1,10 +1,13 @@
 import { useCallback, useState } from "react";
-import { Upload, FileText, X, Plus, Files } from "lucide-react";
+import { Upload, FileText, X, Plus, Files, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const MAX_FILES = 20;
+const LARGE_UPLOAD_FILE_THRESHOLD = 10;
+const LARGE_UPLOAD_PAGE_THRESHOLD = 300;
 
 interface FileUploadProps {
   files: File[];
@@ -82,11 +85,22 @@ export function FileUpload({
   const totalSize = files.reduce((sum, f) => sum + f.size, 0);
   const totalPages = files.reduce((sum, f) => sum + estimatePages(f.size), 0);
   const canAddMore = files.length < MAX_FILES;
+  const isLargeUpload = files.length > LARGE_UPLOAD_FILE_THRESHOLD || totalPages > LARGE_UPLOAD_PAGE_THRESHOLD;
 
   // Has files uploaded - show file list with add more option
   if (files.length > 0) {
     return (
       <div className="space-y-4">
+        {/* Large upload warning */}
+        {isLargeUpload && (
+          <Alert variant="default" className="border-warning/50 bg-warning/10">
+            <AlertTriangle className="h-4 w-4 text-warning" />
+            <AlertDescription className="text-sm text-warning">
+              Large upload detected (~{totalPages} pages). Processing may take 3-5 minutes. Please keep this page open.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Header with count and stats */}
         <div className="flex items-center justify-between rounded-lg border border-border bg-card p-4">
           <div className="flex items-center gap-3">
