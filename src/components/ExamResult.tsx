@@ -105,7 +105,7 @@ export function ExamResult({
   }, [isUnlocked]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       {/* PDF Preview */}
       <div className="animate-slide-up rounded-xl border border-border bg-card shadow-lg overflow-hidden">
         <div className="border-b border-border bg-muted/30 px-4 py-3">

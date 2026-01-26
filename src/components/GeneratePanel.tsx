@@ -541,12 +541,12 @@ export function GeneratePanel({
   // Show progress during generation
   if (isGenerating) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-8">
-        <div className="mb-6 text-center">
-          <h2 className="text-xl font-semibold text-foreground">
+      <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:py-16">
+        <div className="mb-8 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Generating your exam...
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-2 text-base text-muted-foreground">
             This usually takes 30-60 seconds
           </p>
         </div>
