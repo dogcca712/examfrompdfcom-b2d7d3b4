@@ -89,7 +89,7 @@ const Index = () => {
         onMenuClick={() => setIsSidebarOpen(true)}
       />
       
-      <div className="flex flex-1 flex-col pt-16">
+      <div className="flex flex-1 flex-col pt-20">
         {/* Sidebar - controlled by Header menu button */}
         <Sidebar
           jobs={jobs}
