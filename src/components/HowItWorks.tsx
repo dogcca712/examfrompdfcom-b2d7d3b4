@@ -43,11 +43,12 @@ export function HowItWorks() {
         {/* Section Header */}
         <div className="mb-16 text-center">
           <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-            How It Works
+            Generate Exams from PDF in Minutes
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Transform your lecture PDFs into professional practice exams in three
-            simple steps. Fast, intelligent, and beautifully formatted.
+            Our AI exam generator transforms your lecture notes into practice exams instantly. 
+            Simply upload a PDF, and this online exam tool creates professionally formatted 
+            questions — no technical skills required.
           </p>
         </div>
 
