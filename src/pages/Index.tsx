@@ -14,9 +14,22 @@ import { useAuth } from "@/contexts/AuthContext";
 const Index = () => {
   const { isAuthenticated } = useAuth();
   const [jobs, setJobs] = useState<ExamJob[]>([]);
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Persist selected job ID so it survives page refresh
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(() => {
+    return localStorage.getItem("selected_job_id");
+  });
+
+  // Sync selectedJobId to localStorage
+  useEffect(() => {
+    if (selectedJobId) {
+      localStorage.setItem("selected_job_id", selectedJobId);
+    } else {
+      localStorage.removeItem("selected_job_id");
+    }
+  }, [selectedJobId]);
 
   // Track pending job selection (for payment callback)
   const [pendingSelectJobId, setPendingSelectJobId] = useState<string | null>(() => {
