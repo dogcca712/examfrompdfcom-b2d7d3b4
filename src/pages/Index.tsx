@@ -7,65 +7,16 @@ import { Pricing } from "@/components/Pricing";
 import { FAQ } from "@/components/FAQ";
 import { Footer } from "@/components/Footer";
 import { GeneratePanel } from "@/components/GeneratePanel";
-import { ExamJob, isJobExpired } from "@/types/exam";
+import { ExamJob } from "@/types/exam";
 import { jobsApi, API_BASE } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 
-const GUEST_JOBS_KEY = "guest_jobs";
-
-// Helper to load guest jobs from localStorage (with 7-day expiration cleanup)
-function loadGuestJobs(): ExamJob[] {
-  try {
-    const stored = localStorage.getItem(GUEST_JOBS_KEY);
-    if (!stored) return [];
-    const parsed = JSON.parse(stored);
-    if (!Array.isArray(parsed)) return [];
-    
-    // Convert and filter expired jobs
-    const jobs: ExamJob[] = parsed
-      .map((j: any) => ({
-        ...j,
-        createdAt: new Date(j.createdAt),
-      }))
-      .filter((job: ExamJob) => !isJobExpired(job));
-    
-    return jobs;
-  } catch (e) {
-    console.error("Failed to load guest jobs:", e);
-    return [];
-  }
-}
-
-// Helper to save guest jobs to localStorage
-function saveGuestJobs(jobs: ExamJob[]) {
-  try {
-    // Only keep non-expired jobs
-    const validJobs = jobs.filter((job) => !isJobExpired(job));
-    localStorage.setItem(GUEST_JOBS_KEY, JSON.stringify(validJobs));
-  } catch (e) {
-    console.error("Failed to save guest jobs:", e);
-  }
-}
-
 const Index = () => {
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [jobs, setJobs] = useState<ExamJob[]>([]);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // Persist selected job ID so it survives page refresh
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(() => {
-    return localStorage.getItem("selected_job_id");
-  });
-
-  // Sync selectedJobId to localStorage
-  useEffect(() => {
-    if (selectedJobId) {
-      localStorage.setItem("selected_job_id", selectedJobId);
-    } else {
-      localStorage.removeItem("selected_job_id");
-    }
-  }, [selectedJobId]);
 
   // Track pending job selection (for payment callback)
   const [pendingSelectJobId, setPendingSelectJobId] = useState<string | null>(() => {
@@ -79,27 +30,10 @@ const Index = () => {
 
   // Fetch jobs on mount and when auth state changes
   useEffect(() => {
-    // Wait for auth to finish loading before deciding which path to take
-    if (isAuthLoading) {
-      return;
-    }
-    
-    // For anonymous users: load from localStorage
+    // Clear jobs when user logs out
     if (!isAuthenticated) {
-      const guestJobs = loadGuestJobs();
-      setJobs(guestJobs);
-      
-      // Handle pending job selection for anonymous users too
-      if (pendingSelectJobId) {
-        const pendingJob = guestJobs.find((j) => j.jobId === pendingSelectJobId);
-        if (pendingJob) {
-          setSelectedJobId(pendingJob.id);
-          // Only clear pending after successfully selecting
-          setPendingSelectJobId(null);
-        }
-        // If not found, keep pendingSelectJobId for when user logs in
-      }
-      
+      setJobs([]);
+      setSelectedJobId(null);
       setIsLoadingJobs(false);
       return;
     }
@@ -128,9 +62,8 @@ const Index = () => {
           const pendingJob = mappedJobs.find((j) => j.jobId === pendingSelectJobId);
           if (pendingJob) {
             setSelectedJobId(pendingJob.id);
-            // Only clear after successfully selecting
-            setPendingSelectJobId(null);
           }
+          setPendingSelectJobId(null);
         }
       } catch (error) {
         console.error("Failed to fetch jobs:", error);
@@ -139,65 +72,33 @@ const Index = () => {
       }
     };
     fetchJobs();
-  }, [isAuthenticated, isAuthLoading, pendingSelectJobId]);
+  }, [isAuthenticated, pendingSelectJobId]);
 
   const selectedJob = jobs.find((job) => job.id === selectedJobId) || null;
 
   const handleJobCreate = useCallback((job: ExamJob) => {
-    setJobs((prev) => {
-      const newJobs = [job, ...prev];
-      // Save to localStorage for anonymous users
-      if (!isAuthenticated) {
-        saveGuestJobs(newJobs);
-      }
-      return newJobs;
-    });
+    setJobs((prev) => [job, ...prev]);
     setSelectedJobId(job.id);
-  }, [isAuthenticated]);
+  }, []);
 
   const handleJobUpdate = useCallback((updatedJob: ExamJob) => {
-    setJobs((prev) => {
-      const newJobs = prev.map((job) => (job.id === updatedJob.id ? updatedJob : job));
-      // Save to localStorage for anonymous users
-      if (!isAuthenticated) {
-        saveGuestJobs(newJobs);
-      }
-      return newJobs;
-    });
-  }, [isAuthenticated]);
+    setJobs((prev) =>
+      prev.map((job) => (job.id === updatedJob.id ? updatedJob : job))
+    );
+  }, []);
 
   const handleNewExam = useCallback(() => {
     setSelectedJobId(null);
   }, []);
 
   const handleDeleteJob = useCallback(
-    async (id: string) => {
-      // Find the job to get its jobId for the API call
-      const jobToDelete = jobs.find((job) => job.id === id);
-      
-      // For authenticated users, delete from backend
-      if (isAuthenticated && jobToDelete?.jobId) {
-        try {
-          await jobsApi.deleteJob(jobToDelete.jobId);
-        } catch (error) {
-          console.error("Failed to delete job from backend:", error);
-          // Continue with local delete even if backend fails
-        }
-      }
-      
-      setJobs((prev) => {
-        const newJobs = prev.filter((job) => job.id !== id);
-        // Save to localStorage for anonymous users
-        if (!isAuthenticated) {
-          saveGuestJobs(newJobs);
-        }
-        return newJobs;
-      });
+    (id: string) => {
+      setJobs((prev) => prev.filter((job) => job.id !== id));
       if (selectedJobId === id) {
         setSelectedJobId(null);
       }
     },
-    [selectedJobId, isAuthenticated, jobs]
+    [selectedJobId]
   );
 
   // Select job by jobId (backend ID, not frontend UUID)
