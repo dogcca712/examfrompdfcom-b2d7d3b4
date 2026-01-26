@@ -48,7 +48,7 @@ function saveGuestJobs(jobs: ExamJob[]) {
 }
 
 const Index = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [jobs, setJobs] = useState<ExamJob[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -79,6 +79,11 @@ const Index = () => {
 
   // Fetch jobs on mount and when auth state changes
   useEffect(() => {
+    // Wait for auth to finish loading before deciding which path to take
+    if (isAuthLoading) {
+      return;
+    }
+    
     // For anonymous users: load from localStorage
     if (!isAuthenticated) {
       const guestJobs = loadGuestJobs();
@@ -89,8 +94,10 @@ const Index = () => {
         const pendingJob = guestJobs.find((j) => j.jobId === pendingSelectJobId);
         if (pendingJob) {
           setSelectedJobId(pendingJob.id);
+          // Only clear pending after successfully selecting
+          setPendingSelectJobId(null);
         }
-        setPendingSelectJobId(null);
+        // If not found, keep pendingSelectJobId for when user logs in
       }
       
       setIsLoadingJobs(false);
@@ -120,8 +127,9 @@ const Index = () => {
           const pendingJob = mappedJobs.find((j) => j.jobId === pendingSelectJobId);
           if (pendingJob) {
             setSelectedJobId(pendingJob.id);
+            // Only clear after successfully selecting
+            setPendingSelectJobId(null);
           }
-          setPendingSelectJobId(null);
         }
       } catch (error) {
         console.error("Failed to fetch jobs:", error);
@@ -130,7 +138,7 @@ const Index = () => {
       }
     };
     fetchJobs();
-  }, [isAuthenticated, pendingSelectJobId]);
+  }, [isAuthenticated, isAuthLoading, pendingSelectJobId]);
 
   const selectedJob = jobs.find((job) => job.id === selectedJobId) || null;
 
