@@ -82,8 +82,8 @@ const Index = () => {
         onNewExam={handleNewExam}
         onDeleteJob={handleDeleteJob}
       />
-      <main className="flex-1 overflow-y-auto">
-        <div className="flex min-h-full flex-col items-center justify-center py-12">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="flex min-h-full flex-col items-center justify-center py-12 px-4">
           <GeneratePanel
             selectedJob={selectedJob}
             onJobCreate={handleJobCreate}
