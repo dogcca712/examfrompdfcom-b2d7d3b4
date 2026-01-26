@@ -38,21 +38,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD Structured Data - WebApplication -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "ExamGen",
-      "description": "AI-powered practice exam generator that converts lecture PDFs into professionally typeset exams",
+      "description": "AI-powered practice exam generator that converts lecture PDFs into professionally typeset exams with LaTeX formatting",
       "url": "https://examfrompdfcom.lovable.app",
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "Web Browser",
       "offers": {
         "@type": "Offer",
-        "price": "0",
+        "price": "0.99",
         "priceCurrency": "USD",
-        "description": "Free tier available"
+        "description": "Pay per exam download"
       },
       "featureList": [
         "PDF to Practice Exam Conversion",
@@ -62,6 +62,77 @@
         "LaTeX-quality PDF Output",
         "Answer Key Generation"
       ]
+    }
+    </script>
+
+    <!-- JSON-LD Structured Data - FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What types of PDFs can I upload to ExamGen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can upload lecture notes, textbooks, study guides, or any educational material in PDF format. Our AI works best with text-based PDFs, but can also process scanned documents with OCR. Files up to 100MB are supported."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What question types does the practice exam generator support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ExamGen supports multiple choice questions (MCQs), short answer questions, and essay/long-form questions. You can choose your preferred mix and difficulty level before generating."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is the practice exam formatted?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Your practice exam is professionally typeset using LaTeX, the same system used by academic journals and textbooks. This ensures clean formatting, proper mathematical notation, and print-ready quality."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does ExamGen pricing work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ExamGen uses a simple pay-per-download model. You can generate and preview exams for free. When you're satisfied with the result, pay $0.99 to unlock the full PDF download with answer key."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my data secure when using the exam generator?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, your documents are processed securely and are never stored permanently. We use encryption for all file transfers, and your uploaded PDFs are automatically deleted after processing."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD Structured Data - Product -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "ExamGen Practice Exam Generator",
+      "description": "AI-powered practice exam generator that converts lecture PDFs into professionally typeset exams",
+      "brand": {
+        "@type": "Brand",
+        "name": "ExamGen"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0.99",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "priceValidUntil": "2026-12-31"
+      }
     }
     </script>
   </head>
