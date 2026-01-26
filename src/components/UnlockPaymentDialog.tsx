@@ -23,7 +23,7 @@ export function UnlockPaymentDialog({
 }: UnlockPaymentDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-md border-orange-500/50 overflow-hidden p-4 sm:p-6 left-[50%] translate-x-[-50%]">
+      <DialogContent className="sm:max-w-md border-orange-500/50 p-4 sm:p-6 overflow-x-hidden">
         {/* Gradient background accent */}
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-red-500/5 to-transparent pointer-events-none" />
         
@@ -39,9 +39,9 @@ export function UnlockPaymentDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 sm:space-y-4 py-3 sm:py-4 relative">
+        <div className="space-y-3 sm:space-y-4 py-3 sm:py-4 relative w-full overflow-hidden">
           {/* Price Display - Big and Bold with Discount */}
-          <div className="text-center py-3 sm:py-4 rounded-xl bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/20 border border-orange-500/30">
+          <div className="text-center py-3 sm:py-4 rounded-xl bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/20 border border-orange-500/30 w-full box-border">
             <div className="flex items-center justify-center gap-2 mb-1">
               <span className="text-base sm:text-xl text-muted-foreground line-through">$2.00</span>
               <span className="px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full">
@@ -61,7 +61,7 @@ export function UnlockPaymentDialog({
           </div>
 
           {/* What's Included */}
-          <div className="rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-red-500/5 p-3 sm:p-4 space-y-2 sm:space-y-3">
+          <div className="rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-red-500/5 p-3 sm:p-4 space-y-2 sm:space-y-3 w-full box-border">
             <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
               <span className="text-base sm:text-lg">🎁</span> What You Get:
             </h4>
