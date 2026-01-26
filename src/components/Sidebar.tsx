@@ -9,11 +9,11 @@ import {
   AlertCircle,
   LogIn,
   UserPlus,
+  LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { UserMenu } from "@/components/UserMenu";
 import { ExamJob, isJobExpired } from "@/types/exam";
 import { cn } from "@/lib/utils";
 import { downloadPdfWithAuth } from "@/lib/download";
@@ -38,7 +38,7 @@ export function Sidebar({
   isOpen,
   onClose,
 }: SidebarProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   const getExamFileName = (originalPdfName: string) => {
     const base = originalPdfName.replace(/\.pdf$/i, "");
@@ -124,9 +124,31 @@ export function Sidebar({
           {/* Auth Section */}
           <div className="border-b border-sidebar-border p-4">
             {isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <UserMenu />
-                <span className="text-sm text-muted-foreground">Account</span>
+              <div className="rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+                    <span className="text-lg font-bold text-primary">
+                      {user?.email?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {user?.email}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Logged in</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-4 h-10 gap-2 text-sm"
+                  onClick={() => {
+                    logout();
+                    onClose();
+                  }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </Button>
               </div>
             ) : (
               <div className="flex flex-col gap-2">
