@@ -544,9 +544,9 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Generate Practice Exams</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">AI-Powered PDF Exam Generator</h1>
         <p className="mt-3 text-lg text-muted-foreground">
-          Upload your lecture PDF and get a professionally formatted exam in seconds.
+          Upload your lecture PDF and instantly create practice exams. Built for students and teachers who need reliable study tools.
         </p>
       </div>
 
