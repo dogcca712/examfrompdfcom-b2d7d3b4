@@ -2,6 +2,10 @@ import { useState, useCallback, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { HowItWorks } from "@/components/HowItWorks";
+import { Features } from "@/components/Features";
+import { Pricing } from "@/components/Pricing";
+import { FAQ } from "@/components/FAQ";
+import { Footer } from "@/components/Footer";
 import { GeneratePanel } from "@/components/GeneratePanel";
 import { ExamJob } from "@/types/exam";
 import { jobsApi, API_BASE } from "@/lib/api";
@@ -105,6 +109,18 @@ const Index = () => {
 
           {/* How It Works Section */}
           <HowItWorks />
+
+          {/* Features Section */}
+          <Features />
+
+          {/* Pricing Section */}
+          <Pricing />
+
+          {/* FAQ Section */}
+          <FAQ />
+
+          {/* Footer */}
+          <Footer />
         </main>
       </div>
     </div>
