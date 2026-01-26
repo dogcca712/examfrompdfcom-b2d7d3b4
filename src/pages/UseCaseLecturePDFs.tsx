@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { FileText, ArrowRight, Upload, Sparkles, Download, GraduationCap, BookOpen, Users, Clock, CheckCircle, Target, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
@@ -6,17 +7,17 @@ const steps = [
   {
     icon: Upload,
     title: "Upload Your Lecture PDF",
-    description: "Drag and drop your lecture notes, slides, or course materials. Supports PDFs up to 100MB.",
+    description: "Drag and drop your lecture notes, slides, or course materials. The AI reads your PDF content to prepare your practice exam.",
   },
   {
     icon: Sparkles,
-    title: "AI Generates Practice Questions",
-    description: "Our AI exam generator analyzes your content and creates relevant multiple choice, short answer, and essay questions.",
+    title: "AI Generates Your Practice Exam",
+    description: "Our AI exam generator analyzes your lecture PDF and creates a complete practice exam with multiple choice, short answer, and essay questions.",
   },
   {
     icon: Download,
-    title: "Download Your Practice Exam",
-    description: "Get a professionally formatted PDF exam ready for practice or classroom use.",
+    title: "Download Your Practice Exam PDF",
+    description: "Get a professionally formatted practice exam ready for self-study or classroom use — generated directly from your lecture materials.",
   },
 ];
 
@@ -42,17 +43,17 @@ const benefits = [
   {
     icon: Clock,
     title: "Save Hours of Work",
-    description: "Creating practice exams manually takes time. Generate them from your lecture PDFs in minutes.",
+    description: "Creating practice exams manually is tedious. Our practice test maker generates exams from your lecture PDFs in minutes.",
   },
   {
     icon: Target,
-    title: "Questions Match Your Content",
-    description: "Unlike generic practice tests, our AI generates questions directly from your specific materials.",
+    title: "Exams Match Your Lecture Content",
+    description: "Unlike generic practice tests, every question is generated directly from your specific lecture PDF materials.",
   },
   {
     icon: CheckCircle,
     title: "No Signup Required",
-    description: "Start generating practice exams immediately. No account creation, no barriers.",
+    description: "Start generating practice exams from your PDFs immediately. No account creation, no barriers.",
   },
 ];
 
@@ -72,6 +73,19 @@ const scenarios = [
 ];
 
 export default function UseCaseLecturePDFs() {
+  useEffect(() => {
+    document.title = "Create Practice Exams from Lecture PDFs | ExamFromPDF";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute("content", "Turn your lecture PDFs into AI-generated practice exams. Upload course notes and get a ready-to-use practice test in minutes — no signup required.");
+    } else {
+      const meta = document.createElement("meta");
+      meta.name = "description";
+      meta.content = "Turn your lecture PDFs into AI-generated practice exams. Upload course notes and get a ready-to-use practice test in minutes — no signup required.";
+      document.head.appendChild(meta);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -100,10 +114,10 @@ export default function UseCaseLecturePDFs() {
               Create Practice Exams from Lecture PDFs
             </h1>
             <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-              Studying from lecture notes but unsure what to focus on? Most students struggle to turn dense 
-              course materials into effective practice questions. Our AI exam generator transforms your 
-              lecture PDFs into ready-to-use practice exams — so you can test yourself on exactly what 
-              you've been taught.
+              Studying from lecture notes but unsure what to focus on? Most students struggle to turn 
+              dense course materials into effective study tools. With ExamFromPDF, you can generate 
+              practice exams from PDF files in minutes — our AI exam generator transforms your lecture 
+              notes into ready-to-use practice tests, so you can test yourself on exactly what you've been taught.
             </p>
             <div className="mt-8">
               <Button size="lg" asChild>
@@ -163,8 +177,8 @@ export default function UseCaseLecturePDFs() {
               Why Use ExamFromPDF
             </h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Manual exam creation is tedious. Our practice test maker does the heavy lifting so you 
-              can focus on studying or teaching.
+              Creating practice exams by hand is tedious and time-consuming. Our practice test maker 
+              generates complete exams directly from your lecture PDFs — so you can focus on studying or teaching.
             </p>
             <div className="grid gap-6 md:grid-cols-3">
               {benefits.map((benefit) => (
