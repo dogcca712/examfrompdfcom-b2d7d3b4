@@ -18,6 +18,16 @@ const Index = () => {
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Track pending job selection (for payment callback)
+  const [pendingSelectJobId, setPendingSelectJobId] = useState<string | null>(() => {
+    // Check if there's a pending payment job to select on mount
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "success") {
+      return params.get("job_id") || localStorage.getItem("pending_payment_job_id");
+    }
+    return null;
+  });
+
   // Fetch jobs on mount and when auth state changes
   useEffect(() => {
     // Clear jobs when user logs out
@@ -45,6 +55,15 @@ const Index = () => {
           error: job.error,
         }));
         setJobs(mappedJobs);
+        
+        // After loading jobs, check if we need to select a pending job
+        if (pendingSelectJobId) {
+          const pendingJob = mappedJobs.find((j) => j.jobId === pendingSelectJobId);
+          if (pendingJob) {
+            setSelectedJobId(pendingJob.id);
+          }
+          setPendingSelectJobId(null);
+        }
       } catch (error) {
         console.error("Failed to fetch jobs:", error);
       } finally {
@@ -52,7 +71,7 @@ const Index = () => {
       }
     };
     fetchJobs();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, pendingSelectJobId]);
 
   const selectedJob = jobs.find((job) => job.id === selectedJobId) || null;
 
@@ -87,6 +106,9 @@ const Index = () => {
       const job = jobs.find((j) => j.jobId === jobId);
       if (job) {
         setSelectedJobId(job.id);
+      } else {
+        // Jobs might not be loaded yet, store for later
+        setPendingSelectJobId(jobId);
       }
     },
     [jobs]
