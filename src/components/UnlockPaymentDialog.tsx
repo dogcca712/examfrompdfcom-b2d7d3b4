@@ -83,18 +83,18 @@ export function UnlockPaymentDialog({
           <Button
             onClick={onPurchase}
             size="lg"
-            className="w-full h-12 sm:h-14 text-base sm:text-lg font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:from-orange-600 hover:via-red-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/40 hover:shadow-orange-500/60 transition-all duration-300 hover:scale-[1.02] px-3"
+            className="w-full h-12 sm:h-14 text-sm sm:text-lg font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:from-orange-600 hover:via-red-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/40 hover:shadow-orange-500/60 transition-all duration-300 hover:scale-[1.02] px-2 sm:px-3"
             disabled={isLoading}
           >
             {isLoading ? (
               <>
                 <div className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Processing...
+                <span>Processing...</span>
               </>
             ) : (
               <>
-                <CreditCard className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                <span className="truncate">🔥 Pay $0.99 — Download Now!</span>
+                <CreditCard className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                <span>🔥 Pay $0.99 — Download</span>
               </>
             )}
           </Button>
