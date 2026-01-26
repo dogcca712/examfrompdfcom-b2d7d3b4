@@ -115,7 +115,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
       
       // Mark job as unlocked
       setUnlockedJobs((prev) => new Set(prev).add(jobIdToUnlock!));
-      toast.success("支付成功！正在生成答案...");
+      toast.success("Payment successful! Generating answers...");
       
       // Select the job if callback provided
       if (onSelectJobById && jobIdToUnlock) {
@@ -130,7 +130,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
       searchParams.delete("job_id");
       setSearchParams(searchParams, { replace: true });
       localStorage.removeItem("pending_payment_job_id");
-      toast.error("支付已取消");
+      toast.error("Payment cancelled");
     }
   }, [searchParams, setSearchParams, onSelectJobById]);
 
@@ -533,14 +533,14 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
               // Popup was blocked, show manual link
               setIsPurchasing(false);
               toast.error(
-                "无法自动跳转到支付页面。请在浏览器中打开此链接完成支付。",
+                "Unable to redirect to payment. Please open this link in your browser.",
                 {
                   duration: 10000,
                   action: {
-                    label: "复制链接",
+                    label: "Copy Link",
                     onClick: () => {
                       navigator.clipboard.writeText(data.checkout_url);
-                      toast.success("支付链接已复制！");
+                      toast.success("Payment link copied!");
                     },
                   },
                 }
@@ -552,7 +552,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
           // Fallback: try window.open
           const newWindow = window.open(data.checkout_url, "_blank");
           if (!newWindow || newWindow.closed) {
-            toast.error("请在浏览器中打开完成支付", { duration: 5000 });
+            toast.error("Please open in browser to complete payment", { duration: 5000 });
           }
         }
         return;

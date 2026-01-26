@@ -267,8 +267,8 @@ function BackupLinkButton({ jobId }: { jobId: string }) {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       toast({
-        title: "链接已复制",
-        description: "可在其他浏览器中打开此链接",
+        title: "Link copied!",
+        description: "Open this link in another browser if download fails.",
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -281,8 +281,8 @@ function BackupLinkButton({ jobId }: { jobId: string }) {
       document.body.removeChild(textArea);
       setCopied(true);
       toast({
-        title: "链接已复制",
-        description: "可在其他浏览器中打开此链接",
+        title: "Link copied!",
+        description: "Open this link in another browser if download fails.",
       });
       setTimeout(() => setCopied(false), 2000);
     }
@@ -291,17 +291,17 @@ function BackupLinkButton({ jobId }: { jobId: string }) {
   return (
     <button
       onClick={handleCopyLink}
-      className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+      className="w-full flex items-center justify-center gap-2 text-sm font-medium text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg py-3 px-4 transition-all duration-200"
     >
       {copied ? (
         <>
-          <Check className="h-3 w-3 text-success" />
-          <span>已复制!</span>
+          <Check className="h-4 w-4 text-success" />
+          <span>Copied!</span>
         </>
       ) : (
         <>
-          <Copy className="h-3 w-3" />
-          <span>下载有问题? 复制备用链接</span>
+          <Copy className="h-4 w-4" />
+          <span>Download not working? Copy backup link</span>
         </>
       )}
     </button>
