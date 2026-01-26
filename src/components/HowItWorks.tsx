@@ -29,10 +29,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section
-      id="how-it-works"
-      className="relative overflow-hidden bg-muted/30 py-24"
-    >
+    <section id="how-it-works" className="relative overflow-hidden bg-muted/30 py-24">
       {/* Decorative elements */}
       <div className="absolute left-10 top-20 h-3 w-3 rounded-full bg-primary/40" />
       <div className="absolute right-20 top-32 h-2 w-2 rounded-full bg-warning/50" />
@@ -43,12 +40,11 @@ export function HowItWorks() {
         {/* Section Header */}
         <div className="mb-16 text-center">
           <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-            Generate Exams from PDF in Minutes
+            Generate Practice Exams from PDF in Minutes
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Our AI exam generator transforms your lecture notes into practice exams instantly. 
-            Simply upload a PDF, and this online exam tool creates professionally formatted 
-            questions — no technical skills required.
+            Our AI exam generator transforms your lecture notes into practice exams instantly. Simply upload a PDF, and
+            this online exam tool creates professionally formatted questions — no technical skills required.
           </p>
         </div>
 
@@ -59,21 +55,16 @@ export function HowItWorks() {
 
           <div className="grid gap-8 md:grid-cols-3">
             {steps.map((step, index) => (
-              <div
-                key={step.title}
-                className="group relative flex flex-col items-center text-center"
-              >
+              <div key={step.title} className="group relative flex flex-col items-center text-center">
                 {/* Step number badge - positioned above icon with more space */}
-                <div className="mb-3 text-sm font-semibold text-muted-foreground">
-                  Step {index + 1}
-                </div>
+                <div className="mb-3 text-sm font-semibold text-muted-foreground">Step {index + 1}</div>
 
                 {/* Icon container */}
                 <div
                   className={`relative mb-6 flex h-20 w-20 items-center justify-center rounded-2xl ${step.color} shadow-lg transition-transform duration-300 group-hover:scale-110`}
                 >
                   <step.icon className={`h-9 w-9 ${step.iconColor}`} />
-                  
+
                   {/* Decorative ring */}
                   <div className="absolute -inset-2 rounded-3xl border-2 border-dashed border-muted-foreground/20 opacity-0 transition-opacity group-hover:opacity-100" />
                 </div>
@@ -81,21 +72,13 @@ export function HowItWorks() {
                 {/* Content card */}
                 <div className="rounded-xl bg-background p-6 shadow-sm transition-shadow duration-300 group-hover:shadow-md">
                   <h3 className="mb-3 text-xl font-semibold">{step.title}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {step.description}
-                  </p>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{step.description}</p>
                 </div>
 
                 {/* Arrow connector - only on desktop between items */}
                 {index < steps.length - 1 && (
                   <div className="absolute -right-4 top-10 hidden text-muted-foreground/30 lg:block">
-                    <svg
-                      width="32"
-                      height="24"
-                      viewBox="0 0 32 24"
-                      fill="none"
-                      className="opacity-50"
-                    >
+                    <svg width="32" height="24" viewBox="0 0 32 24" fill="none" className="opacity-50">
                       <path
                         d="M0 12h28m0 0l-6-6m6 6l-6 6"
                         stroke="currentColor"
@@ -115,9 +98,7 @@ export function HowItWorks() {
         <div className="mt-16 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-background px-4 py-2 text-sm text-muted-foreground shadow-sm">
             <Download className="h-4 w-4 text-primary" />
-            <span>
-              Download your exam instantly — no account required for first use
-            </span>
+            <span>Download your exam instantly — no account required for first use</span>
           </div>
         </div>
       </div>
