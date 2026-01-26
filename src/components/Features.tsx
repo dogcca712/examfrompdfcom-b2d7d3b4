@@ -29,7 +29,7 @@ const features = [
     icon: BookOpen,
     title: "Built for Education",
     description:
-      "Designed for students and teachers who need a reliable online exam tool. Every exam includes a comprehensive answer key.",
+      "Designed for students and teachers who need a reliable online exam tool, with structured questions and clear answers.",
   },
   {
     icon: Lock,
