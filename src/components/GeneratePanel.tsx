@@ -59,10 +59,11 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
 
       // Map backend stage to step index
       const stageToStep: Record<string, number> = {
-        extracting: 0,
-        writing: 1,
-        formatting: 2,
-        generating: 3,
+        counting: 0,    // 统计PDF页数
+        extracting: 0,  // 提取文本
+        writing: 1,     // 生成题目 (generating in API)
+        generating: 1,  // 生成题目 (alias)
+        formatting: 2,  // 格式化
       };
 
       const pollOnce = async (): Promise<{
