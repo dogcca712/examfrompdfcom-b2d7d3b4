@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { Header } from "@/components/Header";
 import { GeneratePanel } from "@/components/GeneratePanel";
 import { ExamJob } from "@/types/exam";
 import { jobsApi, API_BASE } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+
 const Index = () => {
   const { isAuthenticated } = useAuth();
   const [jobs, setJobs] = useState<ExamJob[]>([]);
@@ -74,24 +76,29 @@ const Index = () => {
   );
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar
-        jobs={jobs}
-        selectedJobId={selectedJobId}
-        onSelectJob={setSelectedJobId}
-        onNewExam={handleNewExam}
-        onDeleteJob={handleDeleteJob}
-      />
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="flex min-h-full flex-col items-center justify-center py-12 px-4">
-          <GeneratePanel
-            selectedJob={selectedJob}
-            onJobCreate={handleJobCreate}
-            onJobUpdate={handleJobUpdate}
-            onClearSelection={handleNewExam}
-          />
-        </div>
-      </main>
+    <div className="flex min-h-screen flex-col bg-background">
+      {/* Top Navigation Header */}
+      <Header />
+      
+      <div className="flex flex-1 pt-14">
+        <Sidebar
+          jobs={jobs}
+          selectedJobId={selectedJobId}
+          onSelectJob={setSelectedJobId}
+          onNewExam={handleNewExam}
+          onDeleteJob={handleDeleteJob}
+        />
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="flex min-h-full flex-col items-center justify-center py-12 px-4">
+            <GeneratePanel
+              selectedJob={selectedJob}
+              onJobCreate={handleJobCreate}
+              onJobUpdate={handleJobUpdate}
+              onClearSelection={handleNewExam}
+            />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
