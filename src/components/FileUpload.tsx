@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const MAX_FILES = 10;
-const MAX_TOTAL_SIZE = 30 * 1024 * 1024; // 30MB
+const MAX_FILES = 20;
+const MAX_TOTAL_SIZE = 100 * 1024 * 1024; // 100MB
 const LARGE_UPLOAD_FILE_THRESHOLD = 5;
 const LARGE_UPLOAD_PAGE_THRESHOLD = 150;
 
@@ -98,7 +98,7 @@ export function FileUpload({
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="text-sm">
-              Total size ({(totalSize / 1024 / 1024).toFixed(1)} MB) exceeds the 30MB limit. Please remove some files.
+              Total size ({(totalSize / 1024 / 1024).toFixed(1)} MB) exceeds the 100MB limit. Please remove some files.
             </AlertDescription>
           </Alert>
         )}
@@ -260,7 +260,7 @@ export function FileUpload({
               {isDragging ? "Drop your PDFs here" : "Upload lecture PDFs"}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Drag and drop or click to browse • Max 30MB total
+              Drag and drop or click to browse • Max 100MB total
             </p>
           </div>
           

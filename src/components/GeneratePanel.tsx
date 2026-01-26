@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { API_BASE, getAccessToken } from "@/lib/api";
 import { downloadPdfWithAuth, isLineInAppBrowser } from "@/lib/download";
 
-const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const POLL_INTERVAL = 2000; // 2 seconds
 const SINGLE_UPLOAD_TIMEOUT = 60000; // 1 minute per file
 
@@ -198,7 +198,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     if (totalSize > MAX_FILE_SIZE) {
       setError({
         message: "Files too large",
-        details: `Total size ${(totalSize / (1024 * 1024)).toFixed(2)}MB exceeds 30MB limit.`,
+        details: `Total size ${(totalSize / (1024 * 1024)).toFixed(2)}MB exceeds 100MB limit.`,
       });
       return;
     }
