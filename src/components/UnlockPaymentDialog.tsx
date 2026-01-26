@@ -23,7 +23,7 @@ export function UnlockPaymentDialog({
 }: UnlockPaymentDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md border-orange-500/50 overflow-hidden p-4 sm:p-6">
+      <DialogContent className="w-[92vw] max-w-md border-orange-500/50 overflow-hidden p-4 sm:p-6 left-[50%] translate-x-[-50%]">
         {/* Gradient background accent */}
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-red-500/5 to-transparent pointer-events-none" />
         
