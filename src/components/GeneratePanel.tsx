@@ -70,7 +70,32 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
 
   // Answer key generation state (deferred until after payment)
   const [isGeneratingAnswerKey, setIsGeneratingAnswerKey] = useState(false);
-  const [answerKeyReady, setAnswerKeyReady] = useState(false);
+  
+  // Persist answer key ready status in localStorage
+  const [answerKeyReadyJobs, setAnswerKeyReadyJobs] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem("answer_key_ready_jobs");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          return new Set(parsed);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to parse answer key ready jobs from localStorage:", e);
+    }
+    return new Set();
+  });
+  
+  // Sync answer key ready jobs to localStorage
+  useEffect(() => {
+    if (answerKeyReadyJobs.size > 0) {
+      localStorage.setItem("answer_key_ready_jobs", JSON.stringify([...answerKeyReadyJobs]));
+    }
+  }, [answerKeyReadyJobs]);
+  
+  // Derive answerKeyReady from the set for current job
+  const answerKeyReady = selectedJob?.jobId ? answerKeyReadyJobs.has(selectedJob.jobId) : false;
 
   // Handle payment success callback from Stripe
   useEffect(() => {
@@ -549,7 +574,12 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
   // Generate answer key after payment
   const generateAnswerKey = async (jobId: string) => {
     setIsGeneratingAnswerKey(true);
-    setAnswerKeyReady(false);
+    // Remove from ready set while generating
+    setAnswerKeyReadyJobs((prev) => {
+      const next = new Set(prev);
+      next.delete(jobId);
+      return next;
+    });
 
     try {
       const token = getAccessToken();
@@ -573,13 +603,14 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
       // Poll for answer key completion
       await pollAnswerKeyStatus(jobId);
 
-      setAnswerKeyReady(true);
+      // Mark this job's answer key as ready
+      setAnswerKeyReadyJobs((prev) => new Set(prev).add(jobId));
       toast.success("Answer key is ready!");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to generate answer key";
       toast.error(message);
       // Still mark as ready to allow retry via download button
-      setAnswerKeyReady(true);
+      setAnswerKeyReadyJobs((prev) => new Set(prev).add(jobId));
     } finally {
       setIsGeneratingAnswerKey(false);
     }
