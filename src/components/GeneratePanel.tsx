@@ -36,6 +36,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     total?: number;
   } | null>(null);
   const [error, setError] = useState<{ message: string; details?: string } | null>(null);
+  const [uploadPhase, setUploadPhase] = useState<'idle' | 'uploading' | 'processing'>('idle');
 
   // Payment state for per-download purchases
   const [isPurchasing, setIsPurchasing] = useState(false);
@@ -179,6 +180,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     setError(null);
     setCurrentStep(0);
     setProgressInfo(null);
+    setUploadPhase('uploading'); // Start in upload phase
 
     // Use first file name for job display, indicate multiple files
     const displayName = files.length > 1 ? `${files[0].name} (+${files.length - 1} more)` : files[0].name;
@@ -283,7 +285,8 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
       const updatedJob: ExamJob = { ...newJob, jobId };
       onJobUpdate(updatedJob);
 
-      // Step 2: Poll for status
+      // Step 2: Poll for status - now in processing phase
+      setUploadPhase('processing');
       setCurrentStep(1);
       await pollJobStatus(jobId, updatedJob);
 
@@ -337,6 +340,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
       onJobUpdate(failedJob);
     } finally {
       setIsGenerating(false);
+      setUploadPhase('idle');
     }
   }, [files, config, isAuthenticated, onJobCreate, onJobUpdate, pollJobStatus, refreshUsage]);
 
@@ -593,37 +597,68 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
       ? Math.round((progressInfo.current / progressInfo.total) * 100)
       : null;
 
+    // Calculate total file size for upload display
+    const totalSizeMB = savedFiles.reduce((sum, f) => sum + f.size, 0) / (1024 * 1024);
+
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:py-16">
         <div className="mb-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Generating your exam...</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+            {uploadPhase === 'uploading' ? 'Uploading files...' : 'Generating your exam...'}
+          </h2>
           <p className="mt-2 text-base text-muted-foreground">
-            {progressInfo?.message 
-              ? progressInfo.message
-              : isLargeUpload 
-                ? `Processing ${savedFiles.length} PDFs (~${totalPages} pages). This may take 3-5 minutes.`
-                : "This usually takes 30-60 seconds"
+            {uploadPhase === 'uploading' 
+              ? `Uploading ${savedFiles.length} PDF${savedFiles.length > 1 ? 's' : ''} (${totalSizeMB.toFixed(1)} MB). Large uploads may take several minutes.`
+              : progressInfo?.message 
+                ? progressInfo.message
+                : isLargeUpload 
+                  ? `Processing ${savedFiles.length} PDFs (~${totalPages} pages). This may take 3-5 minutes.`
+                  : "This usually takes 30-60 seconds"
             }
           </p>
-          {progressPercent !== null && (
+          {uploadPhase === 'uploading' && (
+              <p className="text-sm text-muted-foreground">
+                ⏳ Please keep this page open. Do not refresh or navigate away.
+              </p>
+            )}
+          {progressPercent !== null && uploadPhase === 'processing' && (
             <p className="mt-2 text-lg font-semibold text-primary">
               {progressPercent}% complete
             </p>
           )}
-          {savedFiles.length > 1 && !progressInfo?.message && (
+          {savedFiles.length > 1 && uploadPhase === 'processing' && !progressInfo?.message && (
             <p className="mt-1 text-sm text-muted-foreground/80">
               📄 {savedFiles.length} files combined
             </p>
           )}
         </div>
-        <ProgressTimeline 
-          steps={steps} 
-          currentStep={currentStep}
-          progressMessage={progressInfo?.message}
-          progressCurrent={progressInfo?.current}
-          progressTotal={progressInfo?.total}
-        />
-        {isLargeUpload && (
+        
+        {uploadPhase === 'uploading' ? (
+          <div className="rounded-2xl border border-border bg-card p-8 sm:p-10 shadow-lg">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="relative">
+                <div className="h-16 w-16 rounded-full border-4 border-primary/30 animate-pulse"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                </div>
+              </div>
+              <p className="text-lg font-medium text-foreground">Transmitting to server...</p>
+              <p className="text-sm text-muted-foreground">
+                {savedFiles.length} file{savedFiles.length > 1 ? 's' : ''} • {totalSizeMB.toFixed(1)} MB total
+              </p>
+            </div>
+          </div>
+        ) : (
+          <ProgressTimeline 
+            steps={steps} 
+            currentStep={currentStep}
+            progressMessage={progressInfo?.message}
+            progressCurrent={progressInfo?.current}
+            progressTotal={progressInfo?.total}
+          />
+        )}
+        
+        {isLargeUpload && uploadPhase === 'processing' && (
           <p className="mt-6 text-center text-sm text-muted-foreground">
             ⏳ Large upload detected. Please keep this page open and don't refresh.
           </p>
