@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { API_BASE, getAccessToken } from "@/lib/api";
 import { downloadPdfWithAuth, isLineInAppBrowser } from "@/lib/download";
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const POLL_INTERVAL = 2000; // 2 seconds
 
 interface GeneratePanelProps {
