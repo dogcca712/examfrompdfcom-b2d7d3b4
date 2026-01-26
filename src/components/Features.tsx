@@ -10,33 +10,33 @@ import {
 const features = [
   {
     icon: Brain,
-    title: "AI-Powered Question Generation",
-    description: "Our advanced AI analyzes your content and creates diverse, relevant questions that test real understanding.",
+    title: "Smart AI Quiz Generator",
+    description: "Our AI quiz generator analyzes your lecture content and creates relevant questions that test real understanding — not just memorization.",
   },
   {
     icon: FileOutput,
-    title: "LaTeX-Quality Output",
-    description: "Professional typesetting with proper mathematical notation, clean formatting, and print-ready quality.",
+    title: "Print-Ready PDF Output",
+    description: "Every PDF exam generator output is professionally formatted with clean layouts and proper mathematical notation, ready to print or share.",
   },
   {
     icon: Sliders,
-    title: "Customizable Difficulty",
-    description: "Choose your difficulty level and question types — MCQs, short answers, or essay questions.",
+    title: "Multiple Question Types",
+    description: "This practice test maker supports MCQs, short answers, and essay questions. Choose the format that fits your study goals.",
   },
   {
     icon: Clock,
-    title: "Instant Generation",
-    description: "Get your practice exam in seconds, not hours. Upload, configure, and download immediately.",
+    title: "Fast Exam Processing",
+    description: "Upload your PDF and receive a complete practice exam in seconds. No waiting, no complex setup required.",
   },
   {
     icon: BookOpen,
-    title: "Answer Key Included",
-    description: "Every exam comes with a comprehensive answer key to help you study effectively.",
+    title: "Built for Education",
+    description: "Designed for students and teachers who need a reliable online exam tool. Every exam includes a comprehensive answer key.",
   },
   {
     icon: Lock,
-    title: "Secure & Private",
-    description: "Your documents are processed securely and never stored permanently on our servers.",
+    title: "No Signup Required",
+    description: "Start generating practice exams immediately. Your documents are processed securely and never stored on our servers.",
   },
 ];
 
