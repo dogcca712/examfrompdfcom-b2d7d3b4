@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
+import { HowItWorks } from "@/components/HowItWorks";
 import { GeneratePanel } from "@/components/GeneratePanel";
 import { ExamJob } from "@/types/exam";
 import { jobsApi, API_BASE } from "@/lib/api";
@@ -80,7 +81,8 @@ const Index = () => {
       {/* Top Navigation Header */}
       <Header />
       
-      <div className="flex flex-1 pt-14">
+      <div className="flex flex-1 flex-col pt-14">
+        {/* Sidebar toggle is inside Sidebar component */}
         <Sidebar
           jobs={jobs}
           selectedJobId={selectedJobId}
@@ -88,15 +90,21 @@ const Index = () => {
           onNewExam={handleNewExam}
           onDeleteJob={handleDeleteJob}
         />
+        
+        {/* Main content area */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="flex min-h-full flex-col items-center justify-center py-12 px-4">
+          {/* Hero / Generate Panel Section */}
+          <section className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center py-12 px-4">
             <GeneratePanel
               selectedJob={selectedJob}
               onJobCreate={handleJobCreate}
               onJobUpdate={handleJobUpdate}
               onClearSelection={handleNewExam}
             />
-          </div>
+          </section>
+
+          {/* How It Works Section */}
+          <HowItWorks />
         </main>
       </div>
     </div>
