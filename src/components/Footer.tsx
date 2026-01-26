@@ -52,10 +52,13 @@ export function Footer() {
             </a>
           </nav>
 
-          {/* Copyright */}
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ExamFromPDF
-          </p>
+          {/* Contact & Copyright */}
+          <div className="flex flex-col items-center gap-2 sm:items-end text-sm text-muted-foreground">
+            <a href="mailto:examfrompdf2026@gmail.com" className="transition-colors hover:text-foreground">
+              examfrompdf2026@gmail.com
+            </a>
+            <p>© {new Date().getFullYear()} ExamFromPDF</p>
+          </div>
         </div>
       </div>
     </footer>

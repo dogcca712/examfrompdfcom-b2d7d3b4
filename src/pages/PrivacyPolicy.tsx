@@ -102,7 +102,10 @@ export default function PrivacyPolicy() {
               <h2 className="mb-4 text-2xl font-semibold">Contact Information</h2>
               <p className="text-muted-foreground leading-relaxed">
                 If you have any questions about this Privacy Policy or how we handle your data, 
-                please contact us through the website.
+                please contact us at{" "}
+                <a href="mailto:examfrompdf2026@gmail.com" className="text-primary hover:underline">
+                  examfrompdf2026@gmail.com
+                </a>.
               </p>
             </section>
           </div>

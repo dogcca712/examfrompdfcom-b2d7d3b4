@@ -113,7 +113,10 @@ export default function TermsOfService() {
             <section>
               <h2 className="mb-4 text-2xl font-semibold">Contact</h2>
               <p className="text-muted-foreground leading-relaxed">
-                If you have any questions about these Terms of Service, please contact us through the website.
+                If you have any questions about these Terms of Service, please contact us at{" "}
+                <a href="mailto:examfrompdf2026@gmail.com" className="text-primary hover:underline">
+                  examfrompdf2026@gmail.com
+                </a>.
               </p>
             </section>
           </div>
