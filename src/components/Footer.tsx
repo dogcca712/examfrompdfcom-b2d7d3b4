@@ -1,10 +1,11 @@
 import { FileText, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function Footer() {
   return (
     <footer className="border-t border-border bg-muted/30 py-12">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+        <div className="flex flex-col items-center justify-between gap-8 sm:flex-row sm:items-start">
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70">
@@ -14,6 +15,19 @@ export function Footer() {
               </div>
             </div>
             <span className="text-lg font-semibold">ExamFromPDF</span>
+          </div>
+
+          {/* Use Cases */}
+          <div className="flex flex-col items-center gap-2 sm:items-start">
+            <span className="text-sm font-medium text-foreground">Use Cases</span>
+            <nav className="flex flex-col items-center gap-1.5 text-sm text-muted-foreground sm:items-start">
+              <Link to="/use-case/lecture-pdfs" className="transition-colors hover:text-foreground">
+                Practice Exams from Lecture PDFs
+              </Link>
+              <Link to="/use-case/textbook-pdfs" className="transition-colors hover:text-foreground">
+                Practice Exams from Textbook PDFs
+              </Link>
+            </nav>
           </div>
 
           {/* Links */}
@@ -40,7 +54,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ExamFromPDF. All rights reserved.
+            © {new Date().getFullYear()} ExamFromPDF
           </p>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { Brain, FileOutput, Clock, Lock, Sliders, BookOpen } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const features = [
   {
@@ -73,6 +74,19 @@ export function Features() {
             </div>
           ))}
         </div>
+
+        {/* Internal links sentence */}
+        <p className="mt-12 text-center text-sm text-muted-foreground">
+          ExamFromPDF helps you generate practice exams from{" "}
+          <Link to="/use-case/lecture-pdfs" className="text-primary hover:underline">
+            lecture PDFs
+          </Link>{" "}
+          and{" "}
+          <Link to="/use-case/textbook-pdfs" className="text-primary hover:underline">
+            textbook PDFs
+          </Link>{" "}
+          using AI.
+        </p>
       </div>
     </section>
   );
