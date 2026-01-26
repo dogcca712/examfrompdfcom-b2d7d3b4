@@ -429,7 +429,45 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
 
       // If backend returns a checkout URL, redirect to Stripe
       if (data.checkout_url) {
-        window.location.href = data.checkout_url;
+        // Store job ID for return handling
+        localStorage.setItem("pending_payment_job_id", selectedJob.jobId);
+        
+        // Try multiple redirect methods for better browser compatibility
+        // Some in-app browsers (Line, WeChat) may block window.location.href
+        try {
+          // First try: direct assignment (most reliable for normal browsers)
+          window.location.href = data.checkout_url;
+          
+          // Set a timeout to check if redirect failed
+          setTimeout(() => {
+            // If we're still here after 2 seconds, try alternative methods
+            const newWindow = window.open(data.checkout_url, "_blank");
+            if (!newWindow || newWindow.closed) {
+              // Popup was blocked, show manual link
+              setIsPurchasing(false);
+              toast.error(
+                "无法自动跳转到支付页面。请在浏览器中打开此链接完成支付。",
+                {
+                  duration: 10000,
+                  action: {
+                    label: "复制链接",
+                    onClick: () => {
+                      navigator.clipboard.writeText(data.checkout_url);
+                      toast.success("支付链接已复制！");
+                    },
+                  },
+                }
+              );
+            }
+          }, 2000);
+        } catch (redirectError) {
+          console.error("Redirect failed:", redirectError);
+          // Fallback: try window.open
+          const newWindow = window.open(data.checkout_url, "_blank");
+          if (!newWindow || newWindow.closed) {
+            toast.error("请在浏览器中打开完成支付", { duration: 5000 });
+          }
+        }
         return;
       }
 
@@ -442,7 +480,6 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     } catch (err) {
       const message = err instanceof Error ? err.message : "Payment failed";
       toast.error(message);
-    } finally {
       setIsPurchasing(false);
     }
   };
