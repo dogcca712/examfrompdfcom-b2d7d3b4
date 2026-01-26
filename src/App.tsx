@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import UseCaseLecturePDFs from "./pages/UseCaseLecturePDFs";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/register" element={<Register />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/use-case/lecture-pdfs" element={<UseCaseLecturePDFs />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
