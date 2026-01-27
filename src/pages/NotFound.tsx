@@ -1,7 +1,9 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useCanonical } from "@/hooks/useCanonical";
 
 const NotFound = () => {
+  useCanonical();
   const location = useLocation();
 
   useEffect(() => {

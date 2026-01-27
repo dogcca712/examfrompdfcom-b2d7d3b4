@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Loader2, FileText, ArrowRight } from "lucide-react";
+import { useCanonical } from "@/hooks/useCanonical";
 
 export default function Register() {
+  useCanonical();
   const navigate = useNavigate();
   const { register } = useAuth();
   const [email, setEmail] = useState("");
