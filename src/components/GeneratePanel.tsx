@@ -134,6 +134,61 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
     }
   }, [searchParams, setSearchParams, onSelectJobById]);
 
+  // Check answer key status on page load for unlocked jobs
+  // This handles the case where user refreshes during answer key generation
+  useEffect(() => {
+    const checkAnswerKeyStatus = async () => {
+      if (!selectedJob?.jobId) return;
+      
+      // Only check if job is unlocked but answer key not marked as ready
+      const isUnlocked = unlockedJobs.has(selectedJob.jobId);
+      const isReady = answerKeyReadyJobs.has(selectedJob.jobId);
+      
+      if (!isUnlocked || isReady || isGeneratingAnswerKey) return;
+      
+      // Check backend for answer key status
+      try {
+        const token = getAccessToken();
+        const headers: HeadersInit = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`${API_BASE}/answer_status/${selectedJob.jobId}`, { headers });
+        
+        if (response.ok) {
+          const result = await response.json();
+          
+          if (result.status === "done") {
+            // Answer key is already ready, mark it
+            setAnswerKeyReadyJobs((prev) => new Set(prev).add(selectedJob.jobId));
+          } else if (result.status === "running" || result.status === "queued") {
+            // Still generating, start polling
+            setIsGeneratingAnswerKey(true);
+            try {
+              await pollAnswerKeyStatus(selectedJob.jobId);
+              setAnswerKeyReadyJobs((prev) => new Set(prev).add(selectedJob.jobId));
+            } catch (err) {
+              console.error("Answer key polling failed:", err);
+              // Mark as ready anyway to allow retry
+              setAnswerKeyReadyJobs((prev) => new Set(prev).add(selectedJob.jobId));
+            } finally {
+              setIsGeneratingAnswerKey(false);
+            }
+          } else if (result.status === "not_started") {
+            // Answer key generation never started, trigger it
+            generateAnswerKey(selectedJob.jobId);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check answer key status:", err);
+      }
+    };
+    
+    checkAnswerKeyStatus();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedJob?.jobId, unlockedJobs]);
+
   const steps = [
     { id: "extract", label: "Extracting text" },
     { id: "write", label: "Writing questions" },
