@@ -346,6 +346,7 @@ export function GeneratePanel({ selectedJob, onJobCreate, onJobUpdate, onClearSe
         headers,
         body: JSON.stringify({
           session_id: sessionId,
+          file_name: displayName, // Send original filename for history display
           mcq_count: config.mcqEnabled ? config.mcqCount : 0,
           short_answer_count: config.shortAnswerEnabled ? config.shortAnswerCount : 0,
           long_question_count: config.longQuestionEnabled ? config.longQuestionCount : 0,
