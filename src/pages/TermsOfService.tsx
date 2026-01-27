@@ -1,7 +1,9 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { useCanonical } from "@/hooks/useCanonical";
 
 export default function TermsOfService() {
+  useCanonical();
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header hideNavigation />

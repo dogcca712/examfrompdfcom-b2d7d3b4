@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { FileText, ArrowRight, Upload, Sparkles, Download, GraduationCap, BookOpen, Users, Clock, CheckCircle, Target, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
+import { useCanonical } from "@/hooks/useCanonical";
 
 const steps = [
   {
@@ -73,6 +74,7 @@ const scenarios = [
 ];
 
 export default function UseCaseLecturePDFs() {
+  useCanonical();
   useEffect(() => {
     document.title = "Create Practice Exams from Lecture PDFs | ExamFromPDF";
     const metaDescription = document.querySelector('meta[name="description"]');

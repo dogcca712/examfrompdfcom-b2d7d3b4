@@ -10,6 +10,7 @@ import { GeneratePanel } from "@/components/GeneratePanel";
 import { ExamJob, isJobExpired } from "@/types/exam";
 import { jobsApi, API_BASE } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCanonical } from "@/hooks/useCanonical";
 
 const GUEST_JOBS_KEY = "guest_jobs";
 
@@ -48,6 +49,7 @@ function saveGuestJobs(jobs: ExamJob[]) {
 }
 
 const Index = () => {
+  useCanonical();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [jobs, setJobs] = useState<ExamJob[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
