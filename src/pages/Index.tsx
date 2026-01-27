@@ -112,7 +112,8 @@ const Index = () => {
           jobId: job.jobId || job.id,
           fileName: job.fileName,
           status: job.status,
-          createdAt: new Date(job.createdAt),
+          // Ensure UTC parsing: append 'Z' if no timezone info
+          createdAt: new Date(job.createdAt.endsWith('Z') ? job.createdAt : job.createdAt + 'Z'),
           downloadUrl: job.downloadUrl
             ? job.downloadUrl.startsWith("http")
               ? job.downloadUrl
