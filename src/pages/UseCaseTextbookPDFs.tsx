@@ -86,6 +86,34 @@ export default function UseCaseTextbookPDFs() {
       meta.content = "Generate practice exams from textbook PDFs with AI. Upload any textbook chapter and get a ready-to-use practice test in minutes — no signup required.";
       document.head.appendChild(meta);
     }
+
+    // Add Article JSON-LD schema
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Create Practice Exams from Textbook PDFs",
+      "description": "Generate practice exams from textbook PDFs with AI. Upload any textbook chapter and get a ready-to-use practice test in minutes.",
+      "author": {
+        "@type": "Organization",
+        "name": "ExamFromPDF"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "ExamFromPDF",
+        "url": "https://examfrompdf.com"
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://examfrompdf.com/use-case/textbook-pdfs"
+      }
+    });
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
   }, []);
 
   return (
