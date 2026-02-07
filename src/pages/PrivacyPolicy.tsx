@@ -1,9 +1,11 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useCanonical } from "@/hooks/useCanonical";
+import { useNoIndex } from "@/hooks/useNoIndex";
 
 export default function PrivacyPolicy() {
   useCanonical();
+  useNoIndex();
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header hideNavigation />
