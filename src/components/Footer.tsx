@@ -1,6 +1,5 @@
 import { FileText, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-
 export function Footer() {
   return (
     <footer className="border-t border-border bg-muted/30 py-12">
@@ -44,12 +43,12 @@ export function Footer() {
             <a href="#faq" className="transition-colors hover:text-foreground">
               FAQ
             </a>
-            <a href="/privacy" className="transition-colors hover:text-foreground">
+            <Link to="/privacy" className="transition-colors hover:text-foreground">
               Privacy Policy
-            </a>
-            <a href="/terms" className="transition-colors hover:text-foreground">
+            </Link>
+            <Link to="/terms" className="transition-colors hover:text-foreground">
               Terms of Service
-            </a>
+            </Link>
           </nav>
 
           {/* Contact & Copyright */}
