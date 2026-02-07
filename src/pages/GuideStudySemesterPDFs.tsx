@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FileText, ArrowRight, HelpCircle, AlertTriangle } from "lucide-react";
+import { FileText, ArrowRight, HelpCircle, XCircle, FolderOpen, Target, PenTool, Brain, Layers } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { useCanonical } from "@/hooks/useCanonical";
 import {
@@ -32,20 +32,80 @@ const faqs = [
 
 const mistakes = [
   {
+    icon: XCircle,
     title: "Reading without testing",
-    description: "Many students spend hours re-reading slides, highlighting text, and making notes — then discover they can't recall anything under exam conditions. Recognition (\"I've seen this before\") is not the same as recall (\"I can explain this from memory\"). Without active testing, you're building familiarity, not knowledge."
+    description: "Recognition (\"I've seen this before\") is not the same as recall. Without active testing, you're building familiarity, not knowledge."
   },
   {
+    icon: XCircle,
     title: "Studying everything equally",
-    description: "Not all lecture content is equally examinable. Some slides provide background context; others contain core concepts you'll definitely be tested on. Treating everything with the same attention wastes time on low-priority material while under-preparing for what matters most."
+    description: "Not all content is equally examinable. Treating everything the same wastes time on low-priority material."
   },
   {
+    icon: XCircle,
     title: "Not converting content into practice",
-    description: "Lecture PDFs are passive study materials — they present information but don't challenge you to use it. The gap between reading content and answering exam questions is larger than most students realize. Active transformation of content into self-test questions bridges this gap."
+    description: "Lecture PDFs are passive materials. The gap between reading and answering exam questions is larger than students realize."
   },
   {
+    icon: XCircle,
     title: "Leaving revision to the final week",
-    description: "Cramming might help you pass, but it leads to shallow understanding and rapid forgetting. Spaced study — reviewing material over multiple sessions across weeks — creates stronger, longer-lasting memory traces. Starting earlier isn't about spending more total hours; it's about distributing those hours effectively."
+    description: "Cramming leads to shallow understanding. Spaced study creates stronger, longer-lasting memory traces."
+  }
+];
+
+const steps = [
+  {
+    icon: FolderOpen,
+    title: "Organize Your PDFs by Topic",
+    color: "bg-primary",
+    description: "Before studying content, create structure.",
+    details: [
+      "Group related lectures together (e.g., \"Weeks 1–3: Foundations\")",
+      "Create a simple map of how topics connect",
+      "Identify foundational vs. advanced topics",
+      "Note topics your professor emphasized"
+    ],
+    time: "30–60 minutes"
+  },
+  {
+    icon: Target,
+    title: "Extract Examinable Concepts",
+    color: "bg-amber-500",
+    description: "Identify what's actually testable. Not everything on a slide is exam material.",
+    comparison: {
+      likely: ["Definitions of key terms", "Core theories or models", "Processes with distinct steps", "Comparisons between concepts"],
+      unlikely: ["Historical background", "Tangential anecdotes", "Administrative slides", "Overly detailed examples"]
+    }
+  },
+  {
+    icon: PenTool,
+    title: "Turn Content into Self-Test Questions",
+    color: "bg-violet-500",
+    description: "For each concept, create questions at different levels.",
+    levels: [
+      { name: "Recall", example: "\"Define X\" or \"What are the three types of Y?\"" },
+      { name: "Understanding", example: "\"Why does X happen?\" or \"How does A relate to B?\"" },
+      { name: "Application", example: "\"Given this scenario, which approach would you use?\"" }
+    ]
+  },
+  {
+    icon: Brain,
+    title: "Review with Active Recall",
+    color: "bg-emerald-500",
+    description: "Test before you review. Struggling to recall strengthens memory.",
+    tips: [
+      "Try to answer each question from memory before looking at notes",
+      "Space your practice — alternate between topics",
+      "Focus on what you got wrong",
+      "Explain out loud to reveal gaps"
+    ]
+  },
+  {
+    icon: Layers,
+    title: "Integrate Across Topics",
+    color: "bg-sky-500",
+    description: "As you get closer to the exam, practice questions that connect multiple topics.",
+    tip: "Real exam questions often require you to synthesize knowledge from different parts of the course."
   }
 ];
 
@@ -84,7 +144,7 @@ export default function GuideStudySemesterPDFs() {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-12">
-        <article className="prose prose-slate dark:prose-invert max-w-none">
+        <article className="max-w-none">
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
             How to Study a Whole Semester Using Lecture PDFs
           </h1>
@@ -94,7 +154,7 @@ export default function GuideStudySemesterPDFs() {
             <img 
               src={heroImage} 
               alt="Visual guide showing how to organize and study multiple lecture PDFs for semester exam preparation"
-              className="w-full rounded-lg"
+              className="w-full rounded-xl"
               loading="eager"
             />
           </figure>
@@ -103,217 +163,158 @@ export default function GuideStudySemesterPDFs() {
           <section className="mb-12">
             <p className="text-lg text-muted-foreground leading-relaxed">
               It's three weeks before finals. You open your course folder and find 40 lecture PDFs, 
-              each with 30–60 slides. That's over a thousand slides of content, accumulated across 
-              months of classes you half-remember attending.
+              each with 30–60 slides. That's over a thousand slides of content.
             </p>
-            <p className="text-muted-foreground leading-relaxed">
-              The sheer volume feels paralyzing. Where do you even start? How do you know what's 
-              important? And how do you transform all of this into something you can actually 
-              remember during a two-hour exam?
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              This is one of the most common challenges university students face. Lectures are 
-              delivered week by week, but exams test everything at once. The course felt manageable 
-              in pieces; now you need to consolidate it into coherent, retrievable knowledge.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed mt-4">
               The good news: there's a systematic way to approach this. It won't make the work 
-              disappear, but it will make your effort more effective — and help you avoid the 
-              most common study traps students fall into.
+              disappear, but it will make your effort more effective.
             </p>
           </section>
 
-          {/* Common Mistakes */}
+          {/* Common Mistakes - Grid of Red Cards */}
           <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-              <AlertTriangle className="h-6 w-6 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold mb-6">
               Common Mistakes When Studying from PDFs
             </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Before outlining what works, it's helpful to recognize what doesn't. These patterns 
-              are widespread among students — and recognizing them can help you avoid wasted effort.
-            </p>
-            <div className="space-y-4">
-              {mistakes.map((mistake) => (
-                <div key={mistake.title} className="pl-4 border-l-2 border-destructive/30">
-                  <h3 className="font-medium mb-1">{mistake.title}</h3>
-                  <p className="text-sm text-muted-foreground">{mistake.description}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {mistakes.map((mistake, index) => (
+                <div 
+                  key={mistake.title} 
+                  className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="shrink-0 h-8 w-8 rounded-lg bg-destructive/20 flex items-center justify-center">
+                      <mistake.icon className="h-4 w-4 text-destructive" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-sm mb-1">{mistake.title}</h3>
+                      <p className="text-xs text-muted-foreground">{mistake.description}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* Structured Approach */}
+          {/* Structured Approach - Colorful Step Cards */}
           <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4">
+            <h2 className="text-2xl font-semibold mb-8">
               A Structured Approach to Semester-Wide Study
             </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Here's a practical framework for working through a semester's worth of lecture PDFs 
-              in a way that actually prepares you for exams:
-            </p>
 
-            {/* Step 1 */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">1</span>
-                Organize Your PDFs by Topic
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                Before studying content, create structure. Most courses are organized into major 
-                themes or modules — even if this isn't explicit, you can identify them by looking 
-                at lecture titles and content.
-              </p>
-              <ul className="list-disc pl-6 space-y-1 text-muted-foreground text-sm">
-                <li>Group related lectures together (e.g., "Weeks 1–3: Foundations," "Weeks 4–6: Methods")</li>
-                <li>Create a simple map of how topics connect to each other</li>
-                <li>Identify which topics are foundational vs. which build on earlier material</li>
-                <li>Note any topics your professor explicitly said would be on the exam</li>
-              </ul>
-              <p className="text-muted-foreground leading-relaxed mt-3 text-sm">
-                This step takes 30–60 minutes but saves hours of confused, unfocused study later.
-              </p>
-            </div>
+            <div className="space-y-8">
+              {steps.map((step, index) => (
+                <div 
+                  key={step.title} 
+                  className="relative rounded-xl border border-border bg-card p-6 animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  {/* Step indicator */}
+                  <div className="absolute -top-4 left-6 flex items-center gap-3">
+                    <div className={`h-12 w-12 rounded-xl ${step.color} flex items-center justify-center text-white shadow-lg`}>
+                      <step.icon className="h-6 w-6" />
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground bg-background px-2">
+                      Step {index + 1}
+                    </span>
+                  </div>
 
-            {/* Step 2 */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">2</span>
-                Extract Examinable Concepts
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                For each topic group, go through the lectures and identify what's actually testable. 
-                Not everything on a slide is exam material. Look for:
-              </p>
-              <div className="grid gap-3 sm:grid-cols-2 text-sm">
-                <div className="rounded-lg border border-border p-3">
-                  <p className="font-medium text-success mb-1">Likely examinable</p>
-                  <ul className="list-disc pl-4 text-muted-foreground space-y-1">
-                    <li>Definitions of key terms</li>
-                    <li>Core theories or models</li>
-                    <li>Processes with distinct steps</li>
-                    <li>Comparisons between concepts</li>
-                    <li>Content with worked examples</li>
-                  </ul>
-                </div>
-                <div className="rounded-lg border border-border p-3">
-                  <p className="font-medium text-muted-foreground mb-1">Less likely examinable</p>
-                  <ul className="list-disc pl-4 text-muted-foreground space-y-1">
-                    <li>Historical background</li>
-                    <li>Tangential anecdotes</li>
-                    <li>Administrative slides</li>
-                    <li>Overly detailed examples</li>
-                    <li>Content marked "for reference"</li>
-                  </ul>
-                </div>
-              </div>
-              <p className="text-muted-foreground leading-relaxed mt-3 text-sm">
-                Create a condensed list of concepts for each topic. This becomes your study target.
-              </p>
-            </div>
+                  <div className="pt-6">
+                    <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                    <p className="text-muted-foreground mb-4">{step.description}</p>
 
-            {/* Step 3 */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">3</span>
-                Turn Content into Self-Test Questions
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                This is the most important step. For each concept on your list, create questions 
-                that test your understanding at different levels:
-              </p>
-              <div className="space-y-3 text-sm">
-                <div className="rounded-lg border border-border p-3">
-                  <p className="font-medium mb-1">Recall level</p>
-                  <p className="text-muted-foreground">
-                    "Define X" or "What are the three types of Y?" — testing basic memory.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-border p-3">
-                  <p className="font-medium mb-1">Understanding level</p>
-                  <p className="text-muted-foreground">
-                    "Why does X happen?" or "How does A relate to B?" — testing comprehension.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-border p-3">
-                  <p className="font-medium mb-1">Application level</p>
-                  <p className="text-muted-foreground">
-                    "Given this scenario, which approach would you use and why?" — testing transfer.
-                  </p>
-                </div>
-              </div>
-              <p className="text-muted-foreground leading-relaxed mt-3 text-sm">
-                Don't answer questions immediately. The goal is to build a question bank you'll use later.
-              </p>
-            </div>
+                    {/* Details list */}
+                    {step.details && (
+                      <>
+                        <ul className="list-disc pl-6 space-y-1 text-muted-foreground text-sm mb-3">
+                          {step.details.map((detail) => (
+                            <li key={detail}>{detail}</li>
+                          ))}
+                        </ul>
+                        {step.time && (
+                          <p className="text-xs text-primary font-medium">⏱ Takes about {step.time}</p>
+                        )}
+                      </>
+                    )}
 
-            {/* Step 4 */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">4</span>
-                Review with Active Recall
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                Now use your questions. The key principles:
-              </p>
-              <ul className="list-disc pl-6 space-y-2 text-muted-foreground text-sm">
-                <li>
-                  <strong>Test before you review.</strong> Try to answer each question from memory 
-                  before looking at your notes. Struggling to recall strengthens memory more than 
-                  easy retrieval.
-                </li>
-                <li>
-                  <strong>Space your practice.</strong> Don't review the same topic every day. 
-                  Alternate between topics, returning to each after a gap of 1–3 days.
-                </li>
-                <li>
-                  <strong>Focus on what you got wrong.</strong> Questions you answered correctly 
-                  need less repetition. Prioritize the gaps in your knowledge.
-                </li>
-                <li>
-                  <strong>Explain out loud.</strong> Verbalizing your answers (even to yourself) 
-                  reveals gaps that silent reading hides.
-                </li>
-              </ul>
-            </div>
+                    {/* Comparison grid */}
+                    {step.comparison && (
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3">
+                          <p className="font-medium text-emerald-600 dark:text-emerald-400 text-sm mb-2">✓ Likely examinable</p>
+                          <ul className="text-xs text-muted-foreground space-y-1">
+                            {step.comparison.likely.map((item) => (
+                              <li key={item}>• {item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="rounded-lg bg-muted/50 border border-border p-3">
+                          <p className="font-medium text-muted-foreground text-sm mb-2">✗ Less likely</p>
+                          <ul className="text-xs text-muted-foreground space-y-1">
+                            {step.comparison.unlikely.map((item) => (
+                              <li key={item}>• {item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
 
-            {/* Step 5 */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">5</span>
-                Integrate Across Topics
-              </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                As you get closer to the exam, start practicing questions that connect multiple 
-                topics. Real exam questions often require you to synthesize knowledge from different 
-                parts of the course. Create (or find) questions that ask you to compare, contrast, 
-                or apply concepts across module boundaries.
-              </p>
+                    {/* Question levels */}
+                    {step.levels && (
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        {step.levels.map((level) => (
+                          <div key={level.name} className="rounded-lg bg-muted/50 p-3 text-sm">
+                            <p className="font-medium mb-1">{level.name}</p>
+                            <p className="text-xs text-muted-foreground">{level.example}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Tips list */}
+                    {step.tips && (
+                      <ul className="space-y-2 text-sm">
+                        {step.tips.map((tip) => (
+                          <li key={tip} className="flex items-start gap-2 text-muted-foreground">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0"></span>
+                            {tip}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {/* Single tip */}
+                    {step.tip && (
+                      <p className="text-sm text-muted-foreground pl-3 border-l-2 border-primary/30">
+                        {step.tip}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
           {/* Tools Section */}
-          <section className="mb-12 rounded-lg border border-border bg-muted/30 p-6">
+          <section className="mb-12 rounded-xl border border-primary/20 bg-primary/5 p-6">
             <h2 className="text-xl font-semibold mb-3">
               Using Tools to Speed Up the Process
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
-              The method above is effective but time-intensive — especially the question-creation 
-              step. If you're short on time or have a large volume of material to cover, there are 
-              tools that can help automate part of this process.
+              The method above is effective but time-intensive. If you're short on time, there 
+              are tools that can help automate the question-creation step.
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Some applications can analyze PDF documents and generate practice questions 
-              automatically. These won't replace understanding the material, but they can 
-              significantly reduce the time spent on question creation, letting you focus more 
-              of your energy on actually practicing and learning.
+              automatically — letting you focus more energy on actually practicing and learning.
             </p>
           </section>
 
           {/* FAQ Section */}
           <section className="mb-12">
             <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-              <HelpCircle className="h-6 w-6 text-muted-foreground" />
+              <HelpCircle className="h-6 w-6 text-primary" />
               Frequently Asked Questions
             </h2>
             <Accordion type="single" collapsible className="w-full">
@@ -333,11 +334,10 @@ export default function GuideStudySemesterPDFs() {
           {/* Closing */}
           <section className="border-t border-border pt-8">
             <p className="text-muted-foreground leading-relaxed">
-              Studying a whole semester of lecture PDFs is a significant undertaking. There's no 
-              shortcut that eliminates the work entirely. But a structured approach — organizing 
-              first, extracting what matters, converting to questions, and testing yourself 
-              actively — makes that work far more effective than passive review. Start earlier 
-              than you think you need to, and trust the process.
+              Studying a whole semester of lecture PDFs is a significant undertaking. But a 
+              structured approach — organizing first, extracting what matters, converting to 
+              questions, and testing yourself actively — makes that work far more effective. 
+              Start earlier than you think you need to, and trust the process.
             </p>
           </section>
         </article>
