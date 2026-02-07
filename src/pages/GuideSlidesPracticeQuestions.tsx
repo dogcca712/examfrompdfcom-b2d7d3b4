@@ -9,6 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import heroImage from "@/assets/guide-slides-to-questions-hero.png";
 
 const faqs = [
   {
@@ -66,9 +67,19 @@ export default function GuideSlidesPracticeQuestions() {
       <main className="mx-auto max-w-3xl px-4 py-12">
         {/* Article Header */}
         <article className="prose prose-slate dark:prose-invert max-w-none">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-8">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
             How to Turn Lecture Slides into Practice Questions
           </h1>
+
+          {/* Hero Image */}
+          <figure className="mb-10">
+            <img 
+              src={heroImage} 
+              alt="Step-by-step process of converting lecture slides into practice exam questions for effective study"
+              className="w-full rounded-lg"
+              loading="eager"
+            />
+          </figure>
 
           {/* Opening Section */}
           <section className="mb-12">

@@ -9,6 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import heroImage from "@/assets/guide-study-semester-hero.png";
 
 const faqs = [
   {
@@ -84,9 +85,19 @@ export default function GuideStudySemesterPDFs() {
 
       <main className="mx-auto max-w-3xl px-4 py-12">
         <article className="prose prose-slate dark:prose-invert max-w-none">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-8">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
             How to Study a Whole Semester Using Lecture PDFs
           </h1>
+
+          {/* Hero Image */}
+          <figure className="mb-10">
+            <img 
+              src={heroImage} 
+              alt="Visual guide showing how to organize and study multiple lecture PDFs for semester exam preparation"
+              className="w-full rounded-lg"
+              loading="eager"
+            />
+          </figure>
 
           {/* Introduction */}
           <section className="mb-12">

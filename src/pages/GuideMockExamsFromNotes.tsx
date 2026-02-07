@@ -9,6 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import heroImage from "@/assets/guide-mock-exams-hero.png";
 
 const faqs = [
   {
@@ -83,9 +84,19 @@ export default function GuideMockExamsFromNotes() {
 
       <main className="mx-auto max-w-3xl px-4 py-12">
         <article className="prose prose-slate dark:prose-invert max-w-none">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-8">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
             How to Create Mock Exams from Your Own Notes
           </h1>
+
+          {/* Hero Image */}
+          <figure className="mb-10">
+            <img 
+              src={heroImage} 
+              alt="Illustration showing the transformation of personal study notes into structured mock exam papers with timer"
+              className="w-full rounded-lg"
+              loading="eager"
+            />
+          </figure>
 
           {/* Introduction */}
           <section className="mb-12">
