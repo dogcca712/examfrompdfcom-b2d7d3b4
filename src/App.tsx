@@ -15,6 +15,7 @@ import UseCaseLecturePDFs from "./pages/UseCaseLecturePDFs";
 import UseCaseTextbookPDFs from "./pages/UseCaseTextbookPDFs";
 import GuideSlidesPracticeQuestions from "./pages/GuideSlidesPracticeQuestions";
 import GuideStudySemesterPDFs from "./pages/GuideStudySemesterPDFs";
+import GuideMockExamsFromNotes from "./pages/GuideMockExamsFromNotes";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/use-case/textbook-pdfs" element={<UseCaseTextbookPDFs />} />
               <Route path="/guides/lecture-slides-to-practice-questions" element={<GuideSlidesPracticeQuestions />} />
               <Route path="/guides/study-semester-lecture-pdfs" element={<GuideStudySemesterPDFs />} />
+              <Route path="/guides/mock-exams-from-notes" element={<GuideMockExamsFromNotes />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
