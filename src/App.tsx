@@ -13,6 +13,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import UseCaseLecturePDFs from "./pages/UseCaseLecturePDFs";
 import UseCaseTextbookPDFs from "./pages/UseCaseTextbookPDFs";
+import GuideSlidesPracticeQuestions from "./pages/GuideSlidesPracticeQuestions";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/use-case/lecture-pdfs" element={<UseCaseLecturePDFs />} />
               <Route path="/use-case/textbook-pdfs" element={<UseCaseTextbookPDFs />} />
+              <Route path="/guides/lecture-slides-to-practice-questions" element={<GuideSlidesPracticeQuestions />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
