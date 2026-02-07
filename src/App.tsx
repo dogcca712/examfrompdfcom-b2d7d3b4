@@ -54,9 +54,9 @@ const App = () => (
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/use-case/lecture-pdfs" element={<UseCaseLecturePDFs />} />
               <Route path="/use-case/textbook-pdfs" element={<UseCaseTextbookPDFs />} />
-              <Route path="/guides/lecture-slides-to-practice-questions" element={<GuideSlidesPracticeQuestions />} />
-              <Route path="/guides/study-semester-lecture-pdfs" element={<GuideStudySemesterPDFs />} />
-              <Route path="/guides/mock-exams-from-notes" element={<GuideMockExamsFromNotes />} />
+              <Route path="/how-to-turn-lecture-slides-into-practice-questions" element={<GuideSlidesPracticeQuestions />} />
+              <Route path="/how-to-study-a-whole-semester-from-lecture-pdfs" element={<GuideStudySemesterPDFs />} />
+              <Route path="/how-to-create-mock-exams-from-your-own-notes" element={<GuideMockExamsFromNotes />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
