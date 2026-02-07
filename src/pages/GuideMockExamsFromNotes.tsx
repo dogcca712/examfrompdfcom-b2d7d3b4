@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FileText, ArrowRight, HelpCircle, CheckCircle, Clock, Target } from "lucide-react";
+import { FileText, ArrowRight, HelpCircle, CheckCircle, Clock, Target, Search, PenTool, ListOrdered, Timer } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { useCanonical } from "@/hooks/useCanonical";
 import {
@@ -33,18 +33,74 @@ const faqs = [
 const mockExamQualities = [
   {
     icon: Target,
+    color: "bg-primary",
     title: "Coverage of key topics",
-    description: "A good mock exam tests the major themes and concepts from your course. It shouldn't just focus on what you find interesting or easy — it should proportionally represent what's likely to appear on the real exam."
+    description: "Tests the major themes proportionally — not just what you find interesting or easy."
   },
   {
     icon: CheckCircle,
+    color: "bg-amber-500",
     title: "Mix of question difficulty",
-    description: "Include questions ranging from basic recall to complex application. This mirrors real exams and helps you gauge your understanding at different levels. Easy questions build confidence; hard questions reveal gaps."
+    description: "From basic recall to complex application. Easy questions build confidence; hard ones reveal gaps."
   },
   {
     icon: Clock,
+    color: "bg-emerald-500",
     title: "Realistic time constraints",
-    description: "Time pressure changes everything. A question you can answer in five minutes of relaxed thinking becomes much harder with a clock running. Your mock exam should have a time limit that creates similar pressure to the real thing."
+    description: "Time pressure changes everything. Your mock should have a limit that creates similar pressure."
+  }
+];
+
+const steps = [
+  {
+    icon: Search,
+    title: "Review Notes and Identify Key Concepts",
+    color: "bg-primary",
+    description: "Go through all your materials and identify core concepts likely to be tested.",
+    details: [
+      "Definitions and key terminology",
+      "Theories or frameworks your professor emphasized",
+      "Processes with distinct steps or phases",
+      "Relationships between concepts",
+      "Anything marked as \"important\" or repeated"
+    ]
+  },
+  {
+    icon: PenTool,
+    title: "Turn Concepts into Questions",
+    color: "bg-amber-500",
+    description: "For each concept, generate questions at different cognitive levels.",
+    levels: [
+      { name: "Knowledge/Recall", desc: "\"Define [term]\" or \"List the components of [concept]\"", color: "bg-emerald-500/10 text-emerald-600" },
+      { name: "Comprehension", desc: "\"Explain why [X]\" or \"What is the relationship between [A] and [B]?\"", color: "bg-amber-500/10 text-amber-600" },
+      { name: "Application", desc: "\"Given [scenario], how would you apply [concept]?\"", color: "bg-violet-500/10 text-violet-600" }
+    ],
+    tip: "Aim for roughly 30% recall, 40% understanding, and 30% application."
+  },
+  {
+    icon: ListOrdered,
+    title: "Organize Questions into Exam Format",
+    color: "bg-violet-500",
+    description: "Structure your questions to resemble a real exam.",
+    guidelines: [
+      { label: "Group by section", desc: "Match your real exam structure if known" },
+      { label: "Assign point values", desc: "Helps prioritize during timed practice" },
+      { label: "Order by difficulty", desc: "Place recall questions early, application later" },
+      { label: "Match the length", desc: "Similar number of questions and time limit" }
+    ]
+  },
+  {
+    icon: Timer,
+    title: "Simulate Exam Conditions",
+    color: "bg-emerald-500",
+    description: "Taking the mock under realistic conditions is key.",
+    conditions: [
+      { icon: "⏱", text: "Set a timer and stick to it" },
+      { icon: "📵", text: "No notes or resources" },
+      { icon: "🔇", text: "Find a quiet space" },
+      { icon: "✍️", text: "Write full answers, don't just think through them" }
+    ],
+    tip: "After finishing, review your answers critically and note topics that need more study."
   }
 ];
 
@@ -83,7 +139,7 @@ export default function GuideMockExamsFromNotes() {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-12">
-        <article className="prose prose-slate dark:prose-invert max-w-none">
+        <article className="max-w-none">
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
             How to Create Mock Exams from Your Own Notes
           </h1>
@@ -93,7 +149,7 @@ export default function GuideMockExamsFromNotes() {
             <img 
               src={heroImage} 
               alt="Illustration showing the transformation of personal study notes into structured mock exam papers with timer"
-              className="w-full rounded-lg"
+              className="w-full rounded-xl"
               loading="eager"
             />
           </figure>
@@ -103,217 +159,142 @@ export default function GuideMockExamsFromNotes() {
             <p className="text-lg text-muted-foreground leading-relaxed">
               Mock exams are one of the most effective ways to prepare for a real exam. They force 
               you to retrieve information under pressure, reveal gaps in your knowledge, and build 
-              familiarity with exam conditions. There's strong evidence from learning science that 
-              practice testing outperforms passive study methods like re-reading or highlighting.
+              familiarity with exam conditions.
             </p>
-            <p className="text-muted-foreground leading-relaxed">
-              The problem is access. Many courses don't release past papers, or the available ones 
-              are outdated and cover different material than what you've been taught. You know you 
-              should practice with mock exams, but you don't have any.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              The solution is to create your own. This isn't as hard as it sounds — and the process 
-              of creating a mock exam is itself a powerful study technique. By forcing yourself to 
-              think about what questions might appear and how to phrase them, you engage with the 
-              material more deeply than you would by simply reading it.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              This guide walks through a practical method for turning your own notes into effective 
-              mock exams.
+            <p className="text-muted-foreground leading-relaxed mt-4">
+              The problem is access. Many courses don't release past papers. The solution? Create 
+              your own. The process itself is a powerful study technique.
             </p>
           </section>
 
-          {/* What Makes a Good Mock Exam */}
+          {/* What Makes a Good Mock Exam - Colorful Cards */}
           <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4">
+            <h2 className="text-2xl font-semibold mb-6">
               What Makes a Good Mock Exam
             </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Before creating questions, it helps to understand what you're aiming for. A useful 
-              mock exam has three key qualities:
-            </p>
-            <div className="space-y-4">
-              {mockExamQualities.map((quality) => (
-                <div key={quality.title} className="flex gap-4">
-                  <div className="shrink-0">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                      <quality.icon className="h-5 w-5" />
-                    </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {mockExamQualities.map((quality, index) => (
+                <div 
+                  key={quality.title} 
+                  className="rounded-xl border border-border bg-card p-5 text-center animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className={`h-14 w-14 mx-auto rounded-xl ${quality.color} flex items-center justify-center text-white shadow-lg mb-4`}>
+                    <quality.icon className="h-7 w-7" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">{quality.title}</h3>
-                    <p className="text-sm text-muted-foreground">{quality.description}</p>
+                  <h3 className="font-semibold mb-2">{quality.title}</h3>
+                  <p className="text-sm text-muted-foreground">{quality.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Step-by-Step Process - Colorful Cards */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold mb-8">
+              Step-by-Step: Creating Mock Exams from Your Notes
+            </h2>
+
+            <div className="space-y-8">
+              {steps.map((step, index) => (
+                <div 
+                  key={step.title} 
+                  className="relative rounded-xl border border-border bg-card p-6 animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  {/* Step indicator */}
+                  <div className="absolute -top-4 left-6 flex items-center gap-3">
+                    <div className={`h-12 w-12 rounded-xl ${step.color} flex items-center justify-center text-white shadow-lg`}>
+                      <step.icon className="h-6 w-6" />
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground bg-background px-2">
+                      Step {index + 1}
+                    </span>
+                  </div>
+
+                  <div className="pt-6">
+                    <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                    <p className="text-muted-foreground mb-4">{step.description}</p>
+
+                    {/* Details list */}
+                    {step.details && (
+                      <ul className="list-disc pl-6 space-y-1 text-muted-foreground text-sm">
+                        {step.details.map((detail) => (
+                          <li key={detail}>{detail}</li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {/* Question levels */}
+                    {step.levels && (
+                      <div className="space-y-2 mb-4">
+                        {step.levels.map((level) => (
+                          <div key={level.name} className={`rounded-lg p-3 ${level.color}`}>
+                            <p className="font-medium text-sm">{level.name}</p>
+                            <p className="text-xs opacity-80">{level.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Guidelines */}
+                    {step.guidelines && (
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {step.guidelines.map((guide) => (
+                          <div key={guide.label} className="flex items-start gap-2 text-sm">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0"></span>
+                            <div>
+                              <span className="font-medium">{guide.label}:</span>
+                              <span className="text-muted-foreground ml-1">{guide.desc}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Exam conditions */}
+                    {step.conditions && (
+                      <div className="grid gap-2 sm:grid-cols-2 mb-4">
+                        {step.conditions.map((cond) => (
+                          <div key={cond.text} className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span className="text-lg">{cond.icon}</span>
+                            {cond.text}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Tip */}
+                    {step.tip && (
+                      <p className="text-sm text-muted-foreground mt-4 pl-3 border-l-2 border-primary/30">
+                        {step.tip}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
-            <p className="text-muted-foreground leading-relaxed mt-6">
-              Your mock exam doesn't need to be perfect. It needs to be useful — challenging enough 
-              to expose weaknesses and comprehensive enough to cover what matters.
-            </p>
-          </section>
-
-          {/* Step-by-Step Process */}
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-4">
-              Step-by-Step: Creating Mock Exams from Your Notes
-            </h2>
-
-            {/* Step 1 */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">1</span>
-                Review Your Notes and Identify Key Concepts
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                Start by going through all your notes — lecture slides, handwritten notes, textbook 
-                summaries. As you review, identify the core concepts that are likely to be tested.
-              </p>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                Look for:
-              </p>
-              <ul className="list-disc pl-6 space-y-1 text-muted-foreground text-sm">
-                <li>Definitions and key terminology</li>
-                <li>Theories, models, or frameworks your professor emphasized</li>
-                <li>Processes with distinct steps or phases</li>
-                <li>Relationships between concepts (cause-effect, compare-contrast)</li>
-                <li>Examples that illustrate broader principles</li>
-                <li>Anything marked as "important" or repeated across multiple lectures</li>
-              </ul>
-              <p className="text-muted-foreground leading-relaxed mt-3 text-sm">
-                Create a list of these concepts. This becomes the foundation of your mock exam.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">2</span>
-                Turn Concepts into Questions
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                For each concept, generate questions at different cognitive levels:
-              </p>
-              <div className="space-y-3 text-sm">
-                <div className="rounded-lg border border-border p-3">
-                  <p className="font-medium mb-1">Knowledge/Recall</p>
-                  <p className="text-muted-foreground mb-2">
-                    "Define [term]" or "List the components of [concept]"
-                  </p>
-                  <p className="text-xs text-muted-foreground/70 italic">
-                    Example: "Define cognitive load and list its three types."
-                  </p>
-                </div>
-                <div className="rounded-lg border border-border p-3">
-                  <p className="font-medium mb-1">Comprehension/Understanding</p>
-                  <p className="text-muted-foreground mb-2">
-                    "Explain why [X]" or "What is the relationship between [A] and [B]?"
-                  </p>
-                  <p className="text-xs text-muted-foreground/70 italic">
-                    Example: "Explain why intrinsic cognitive load cannot be reduced by instructional design."
-                  </p>
-                </div>
-                <div className="rounded-lg border border-border p-3">
-                  <p className="font-medium mb-1">Application/Analysis</p>
-                  <p className="text-muted-foreground mb-2">
-                    "Given [scenario], how would you apply [concept]?" or "Analyze [situation] using [framework]"
-                  </p>
-                  <p className="text-xs text-muted-foreground/70 italic">
-                    Example: "A student is struggling to learn from a complex diagram. Using cognitive load theory, suggest two modifications to improve learning."
-                  </p>
-                </div>
-              </div>
-              <p className="text-muted-foreground leading-relaxed mt-4 text-sm">
-                Aim for a mix: roughly 30% recall, 40% understanding, and 30% application. Adjust 
-                based on your course — some subjects emphasize memorization, others emphasize problem-solving.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">3</span>
-                Organize Questions into Exam Format
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                Structure your questions to resemble a real exam:
-              </p>
-              <ul className="list-disc pl-6 space-y-2 text-muted-foreground text-sm">
-                <li>
-                  <strong>Group by section.</strong> If your real exam has sections (e.g., multiple 
-                  choice, short answer, essay), organize your mock exam the same way.
-                </li>
-                <li>
-                  <strong>Assign point values.</strong> This helps you prioritize during timed practice 
-                  and makes the experience feel more realistic.
-                </li>
-                <li>
-                  <strong>Order by difficulty.</strong> Typically, exams start with easier questions. 
-                  Place your recall questions early and application questions later.
-                </li>
-                <li>
-                  <strong>Match the length.</strong> If your real exam is 2 hours with 50 questions, 
-                  your mock should be similar. Don't create a 100-question mock for a 30-question exam.
-                </li>
-              </ul>
-            </div>
-
-            {/* Step 4 */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">4</span>
-                Simulate Exam Conditions
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                Creating the mock exam is only half the value. Taking it under realistic conditions 
-                is the other half.
-              </p>
-              <ul className="list-disc pl-6 space-y-2 text-muted-foreground text-sm">
-                <li>
-                  <strong>Set a timer.</strong> Stick to it. Don't give yourself extra time "just 
-                  this once" — the goal is to practice under pressure.
-                </li>
-                <li>
-                  <strong>No notes or resources.</strong> Close your books, turn off your phone, 
-                  and work from memory only.
-                </li>
-                <li>
-                  <strong>Find a quiet space.</strong> Simulate the focus required in an exam hall 
-                  as closely as possible.
-                </li>
-                <li>
-                  <strong>Write full answers.</strong> Don't just think through answers — write them 
-                  out. This tests whether you can actually articulate your knowledge, not just 
-                  recognize it.
-                </li>
-              </ul>
-              <p className="text-muted-foreground leading-relaxed mt-3 text-sm">
-                After finishing, review your answers critically. Mark what you got wrong and note 
-                topics that need more study.
-              </p>
-            </div>
           </section>
 
           {/* Tools Section */}
-          <section className="mb-12 rounded-lg border border-border bg-muted/30 p-6">
+          <section className="mb-12 rounded-xl border border-primary/20 bg-primary/5 p-6">
             <h2 className="text-xl font-semibold mb-3">
               Tools That Can Help
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
               Creating mock exams manually is effective but time-consuming. If you're working with 
-              PDF notes or lecture slides, some tools can automate the question-generation step.
+              PDF notes, some tools can automate the question-generation step.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              These tools analyze your documents and produce practice questions in various formats. 
-              They won't replace understanding the material — you still need to study — but they can 
-              save hours of question-writing time, especially when you have a lot of material to cover.
+              They won't replace understanding the material, but they can save hours of 
+              question-writing time — especially when you have a lot of material to cover.
             </p>
           </section>
 
           {/* FAQ Section */}
           <section className="mb-12">
             <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-              <HelpCircle className="h-6 w-6 text-muted-foreground" />
+              <HelpCircle className="h-6 w-6 text-primary" />
               Frequently Asked Questions
             </h2>
             <Accordion type="single" collapsible className="w-full">
@@ -334,10 +315,9 @@ export default function GuideMockExamsFromNotes() {
           <section className="border-t border-border pt-8">
             <p className="text-muted-foreground leading-relaxed">
               Creating mock exams from your own notes takes effort, but it's effort that pays off 
-              twice: once during creation (which deepens your understanding) and again during practice 
-              (which strengthens your recall). If you don't have access to past papers, this is one 
-              of the best alternatives available — and in some ways, it's even better, because you 
-              control exactly what gets tested.
+              twice: once during creation (which deepens understanding) and again during practice 
+              (which strengthens recall). If you don't have access to past papers, this is one of 
+              the best alternatives available.
             </p>
           </section>
         </article>
